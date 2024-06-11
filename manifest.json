@@ -2,12 +2,16 @@
     "manifest_version": 3,
     "name": "Papaya CookieMonster",
     "version": "1.0",
-    "permissions": ["storage", "http://*/", "https://*/"],
+    "permissions": ["storage"],
+    "host_permissions": [
+      "http://*/*",
+      "https://*/*"
+    ],
     "content_scripts": [
       {
-        "matches": ["http://*/", "https://*/"],
+        "matches": ["http://*/*", "https://*/*"],
         "js": ["content.js"]
       }
     ]
-  }
+}
   
