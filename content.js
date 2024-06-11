@@ -1,5 +1,5 @@
 // Load JSON data
-fetch(chrome.runtime.getURL('https://github.com/papayaverse/cookie_monster/blob/4a779c9ca088fef8c97c3a251521a013c9c33e16/url_data_s3_jun_11_24_as_json.json'))
+fetch(chrome.runtime.getURL('url_data.json'))
   .then(response => response.json())
   .then(buttonData => {
     // Function to handle cookie banners
