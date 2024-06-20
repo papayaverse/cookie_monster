@@ -71,7 +71,7 @@ function handleCookieBanner(buttons) {
           }
 
           // If "Reject All" is not found, try to click "Confirm My Preferences"
-          if (!rejectAllClicked) {
+          //if (!rejectAllClicked) {
             if (buttons.internal_buttons) {
               buttons.internal_buttons.forEach(button => {
                 if (button.option_name === 'confirm_my_preferences') {
@@ -79,7 +79,7 @@ function handleCookieBanner(buttons) {
                 }
               });
             }
-          }
+          //}
         }, 2000); // Adjust delay as needed for your pages
         return;
       }
