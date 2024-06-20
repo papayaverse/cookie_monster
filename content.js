@@ -61,12 +61,24 @@ function handleCookieBanner(buttons) {
       if (manageMyPreferencesClicked) {
         // Wait for internal buttons to appear
         setTimeout(() => {
+          let rejectAllClicked = false;
           if (buttons.internal_buttons) {
             buttons.internal_buttons.forEach(button => {
               if (button.option_name === 'reject_all') {
-                findAndClickButton(button);
+                rejectAllClicked = findAndClickButton(button);
               }
             });
+          }
+
+          // If "Reject All" is not found, try to click "Confirm My Preferences"
+          if (!rejectAllClicked) {
+            if (buttons.internal_buttons) {
+              buttons.internal_buttons.forEach(button => {
+                if (button.option_name === 'confirm_my_preferences') {
+                  findAndClickButton(button);
+                }
+              });
+            }
           }
         }, 2000); // Adjust delay as needed for your pages
         return;
@@ -91,5 +103,3 @@ chrome.runtime.sendMessage({ action: 'getButtonData', domain: domain }, response
     handleCookieBanner(response);
   }
 });
-
-  
