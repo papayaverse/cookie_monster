@@ -92,7 +92,7 @@ function handleCookieBanner(buttons) {
   }, 2000); // Adjust delay as needed for your pages
 }
 
-const domain = window.location.hostname.replace('www.', '');
+const domain = window.location.hostname.replace('www.', '').replace('papers.', '');
 
 // Request button data from the background script
 chrome.runtime.sendMessage({ action: 'getButtonData', domain: domain }, response => {
