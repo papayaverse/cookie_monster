@@ -1,9 +1,11 @@
 // Function to handle cookie banners
-function handleCookieBanner(buttons) {
+function handleCookieBanner(buttons, preferences) {
   if (!buttons) {
     console.log('No button data found for domain:', domain);
     return;
   }
+
+  const preference = preferences || 'reject_all'; // Default to reject_all if no preference for domain
 
   // Helper function to find and click a button
   function findAndClickButton(buttonDetails) {
@@ -49,14 +51,12 @@ function handleCookieBanner(buttons) {
 
   // Wait for external buttons to load
   setTimeout(() => {
-    // Try to click the "Reject All" button
-    if (buttons.external_buttons && buttons.external_buttons.reject_all) {
+    if (preference === 'reject_all' && buttons.external_buttons && buttons.external_buttons.reject_all) {
       const rejectAllClicked = findAndClickButton(buttons.external_buttons.reject_all);
       if (rejectAllClicked) return;
     }
 
-    // If "Reject All" is not found, try to click "Manage My Preferences"
-    if (buttons.external_buttons && buttons.external_buttons.manage_my_preferences) {
+    if (preference === 'manage_my_preferences' && buttons.external_buttons && buttons.external_buttons.manage_my_preferences) {
       const manageMyPreferencesClicked = findAndClickButton(buttons.external_buttons.manage_my_preferences);
       if (manageMyPreferencesClicked) {
         // Wait for internal buttons to appear
@@ -71,7 +71,7 @@ function handleCookieBanner(buttons) {
           }
 
           // If "Reject All" is not found, try to click "Confirm My Preferences"
-          //if (!rejectAllClicked) {
+          if (!rejectAllClicked) {
             if (buttons.internal_buttons) {
               buttons.internal_buttons.forEach(button => {
                 if (button.option_name === 'confirm_my_preferences') {
@@ -79,27 +79,33 @@ function handleCookieBanner(buttons) {
                 }
               });
             }
-          //}
+          }
         }, 2000); // Adjust delay as needed for your pages
         return;
       }
     }
 
-    // If neither "Reject All" nor "Manage My Preferences" are found, click "Accept All"
-    if (buttons.external_buttons && buttons.external_buttons.accept_all) {
+    if (preference === 'accept_all' && buttons.external_buttons && buttons.external_buttons.accept_all) {
       findAndClickButton(buttons.external_buttons.accept_all);
     }
   }, 2000); // Adjust delay as needed for your pages
 }
 
-const domain = window.location.hostname.replace('www.', '').replace('papers.', '');
+const domain = window.location.hostname.replace('www.', '');
 
-// Request button data from the background script
-chrome.runtime.sendMessage({ action: 'getButtonData', domain: domain }, response => {
+// Request user preferences and button data from the background script
+chrome.runtime.sendMessage({ action: 'getUserPreferences', domain: domain }, userPreferences => {
   if (chrome.runtime.lastError) {
-    console.error('Error fetching button data:', chrome.runtime.lastError.message);
+    console.error('Error fetching user preferences:', chrome.runtime.lastError.message);
   } else {
-    console.log('Button data received from background script:', response);
-    handleCookieBanner(response);
+    console.log('User preferences received from background script:', userPreferences);
+    chrome.runtime.sendMessage({ action: 'getButtonData', domain: domain }, buttonData => {
+      if (chrome.runtime.lastError) {
+        console.error('Error fetching button data:', chrome.runtime.lastError.message);
+      } else {
+        console.log('Button data received from background script:', buttonData);
+        handleCookieBanner(buttonData, userPreferences);
+      }
+    });
   }
 });
