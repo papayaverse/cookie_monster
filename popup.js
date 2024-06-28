@@ -9,7 +9,8 @@ document.getElementById('loginButton').addEventListener('click', () => {
         headers: {
           'Authorization': 'Basic ' + btoa(username + ':' + password),
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       })
       .then(response => {
         if (!response.ok) {
@@ -19,9 +20,9 @@ document.getElementById('loginButton').addEventListener('click', () => {
       })
       .then(data => {
         if (data.message.includes('Logged in successfully')) {
-          // Store the credentials securely
-          chrome.storage.local.set({ username, password }, () => {
-            console.log('Credentials saved');
+          // Store the session ID cookie securely
+          chrome.storage.local.set({ session_id: data.session_id }, () => {
+            console.log('Session ID saved');
             alert('Login successful!');
           });
         } else {
@@ -33,4 +34,5 @@ document.getElementById('loginButton').addEventListener('click', () => {
       alert('Please enter both username and password.');
     }
   });
+  
   
