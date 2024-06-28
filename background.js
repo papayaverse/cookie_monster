@@ -28,6 +28,9 @@ function fetchUserPreferences(domain, callback) {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
+        },
+        cookies: {
+          'session_id': sessionId
         }
       })
       .then(response => {
