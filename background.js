@@ -1,13 +1,22 @@
 let buttonData = {};
 
-// Fetch the JSON data once when the service worker starts
-fetch(chrome.runtime.getURL('url_data2.json'))
-  .then(response => response.json())
-  .then(data => {
-    buttonData = data;
-    console.log('Button data loaded in background script:', buttonData);
-  })
-  .catch(error => console.error('Error loading button data in background script:', error));
+// Load the JSON data once when the service worker starts and store it in a Promise
+const loadButtonData = () => {
+  return fetch(chrome.runtime.getURL('url_data2.json'))
+    .then(response => response.json())
+    .then(data => {
+      buttonData = data;
+      console.log('Button data loaded in background script:', buttonData);
+      return data;
+    })
+    .catch(error => {
+      console.error('Error loading button data in background script:', error);
+      throw error;
+    });
+};
+
+// Call the loadButtonData function and store the Promise
+const buttonDataPromise = loadButtonData();
 
 // Fetch user preferences from API
 function fetchUserPreferences(domain, callback) {
@@ -41,7 +50,14 @@ function fetchUserPreferences(domain, callback) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getButtonData') {
     const domain = message.domain;
-    sendResponse(buttonData[domain]);
+    // Wait for the button data to be loaded before responding
+    buttonDataPromise.then(() => {
+      sendResponse(buttonData[domain]);
+    }).catch(error => {
+      console.error('Error sending button data:', error);
+      sendResponse({});
+    });
+    return true; // Will respond asynchronously
   } else if (message.action === 'getUserPreferences') {
     const domain = message.domain;
     fetchUserPreferences(domain, preferences => {

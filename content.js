@@ -5,7 +5,12 @@ function handleCookieBanner(buttons, preferences) {
     return;
   }
 
-  const preference = preferences || 'reject_all'; // Default to reject_all if no preference for domain
+  const { marketing, performance } = preferences;
+
+  let actionType = 'reject_all'; // Default to reject_all if no preference for domain
+  if (marketing === true && performance === true) {
+    actionType = 'accept_all';
+  }
 
   // Helper function to find and click a button
   function findAndClickButton(buttonDetails) {
@@ -49,44 +54,82 @@ function handleCookieBanner(buttons, preferences) {
     return false;
   }
 
-  // Wait for external buttons to load
-  setTimeout(() => {
-    if (preference === 'reject_all' && buttons.external_buttons && buttons.external_buttons.reject_all) {
-      const rejectAllClicked = findAndClickButton(buttons.external_buttons.reject_all);
-      if (rejectAllClicked) return;
+  // Function to handle accept all path
+  function handleAcceptAll() {
+    if (buttons.external_buttons && buttons.external_buttons.accept_all) {
+      const acceptAllClicked = findAndClickButton(buttons.external_buttons.accept_all);
+      if (acceptAllClicked) return;
     }
 
-    if (preference === 'manage_my_preferences' && buttons.external_buttons && buttons.external_buttons.manage_my_preferences) {
+    if (buttons.external_buttons && buttons.external_buttons.manage_my_preferences) {
       const manageMyPreferencesClicked = findAndClickButton(buttons.external_buttons.manage_my_preferences);
       if (manageMyPreferencesClicked) {
         // Wait for internal buttons to appear
         setTimeout(() => {
-          let rejectAllClicked = false;
           if (buttons.internal_buttons) {
             buttons.internal_buttons.forEach(button => {
-              if (button.option_name === 'reject_all') {
-                rejectAllClicked = findAndClickButton(button);
+              if (button.option_name === 'accept_all') {
+                const acceptAllClicked = findAndClickButton(button);
+                if (acceptAllClicked) {
+                  // Click confirm my preferences after accept all
+                  setTimeout(() => {
+                    buttons.internal_buttons.forEach(button => {
+                      if (button.option_name === 'confirm_my_preferences') {
+                        findAndClickButton(button);
+                      }
+                    });
+                  }, 2000);
+                }
               }
             });
-          }
-
-          // If "Reject All" is not found, try to click "Confirm My Preferences"
-          if (!rejectAllClicked) {
-            if (buttons.internal_buttons) {
-              buttons.internal_buttons.forEach(button => {
-                if (button.option_name === 'confirm_my_preferences') {
-                  findAndClickButton(button);
-                }
-              });
-            }
           }
         }, 2000); // Adjust delay as needed for your pages
         return;
       }
     }
+  }
 
-    if (preference === 'accept_all' && buttons.external_buttons && buttons.external_buttons.accept_all) {
-      findAndClickButton(buttons.external_buttons.accept_all);
+  // Function to handle reject all path
+  function handleRejectAll() {
+    if (buttons.external_buttons && buttons.external_buttons.reject_all) {
+      const rejectAllClicked = findAndClickButton(buttons.external_buttons.reject_all);
+      if (rejectAllClicked) return;
+    }
+
+    if (buttons.external_buttons && buttons.external_buttons.manage_my_preferences) {
+      const manageMyPreferencesClicked = findAndClickButton(buttons.external_buttons.manage_my_preferences);
+      if (manageMyPreferencesClicked) {
+        // Wait for internal buttons to appear
+        setTimeout(() => {
+          if (buttons.internal_buttons) {
+            buttons.internal_buttons.forEach(button => {
+              if (button.option_name === 'reject_all') {
+                const rejectAllClicked = findAndClickButton(button);
+                if (rejectAllClicked) {
+                  // Click confirm my preferences after reject all
+                  setTimeout(() => {
+                    buttons.internal_buttons.forEach(button => {
+                      if (button.option_name === 'confirm_my_preferences') {
+                        findAndClickButton(button);
+                      }
+                    });
+                  }, 2000);
+                }
+              }
+            });
+          }
+        }, 2000); // Adjust delay as needed for your pages
+        return;
+      }
+    }
+  }
+
+  // Wait for external buttons to load
+  setTimeout(() => {
+    if (actionType === 'accept_all') {
+      handleAcceptAll();
+    } else {
+      handleRejectAll();
     }
   }, 2000); // Adjust delay as needed for your pages
 }
