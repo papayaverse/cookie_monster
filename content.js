@@ -29,7 +29,8 @@ function handleCookieBanner(buttons, preferences) {
 
     // Try to find the button by Text
     if (buttonDetails.text) {
-      const xpath = `//button[contains(text(), "${buttonDetails.text}")]`;
+      const xpath = `//*[contains(text(), "${buttonDetails.text}")]`; 
+
       button = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       if (button) {
         console.log(`Clicking button by Text (${buttonDetails.text}):`, button);
@@ -41,7 +42,8 @@ function handleCookieBanner(buttons, preferences) {
 
     // Try to find the button by Class
     if (buttonDetails.class) {
-      button = document.querySelector(`.${buttonDetails.class}`);
+      const classXpath = `//*[${buttonDetails.class.split(' ').map(cls => `contains(@class, '${cls}')`).join(' and ')}]`;
+      button = document.evaluate(classXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       if (button) {
         console.log(`Clicking button by Class (${buttonDetails.class}):`, button);
         button.click();
