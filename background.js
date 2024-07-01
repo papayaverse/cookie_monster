@@ -20,15 +20,13 @@ const buttonDataPromise = loadButtonData();
 
 // Fetch user preferences from API
 function fetchUserPreferences(domain, callback) {
-  chrome.storage.local.get(['session_id'], (data) => {
-    const sessionId = data.session_id;
-    if (sessionId) {
+  chrome.storage.local.get(['username', 'password'], (credentials) => {
+    if (credentials.username && credentials.password) {
       fetch(`https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/preferences/${domain}`, {
         method: 'GET',
-        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          'Cookie': `session_id=${sessionId}`
+          'Authorization': 'Basic ' + btoa(credentials.username + ':' + credentials.password),
+          'Content-Type': 'application/json'
         }
       })
       .then(response => {
@@ -43,7 +41,7 @@ function fetchUserPreferences(domain, callback) {
       })
       .catch(error => console.error('Error loading user preferences:', error));
     } else {
-      console.error('No session ID found');
+      console.error('No credentials found');
     }
   });
 }
@@ -68,3 +66,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true; // Will respond asynchronously
   }
 });
+
