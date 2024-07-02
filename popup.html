@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Login</title>
+  <title>CookieMonster Extension</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
     }
-    label, input {
+    .tab {
+      display: none;
+    }
+    .tab.active {
+      display: block;
+    }
+    label, input, button {
       display: block;
       margin-bottom: 10px;
     }
@@ -18,15 +24,55 @@
       border: none;
       cursor: pointer;
     }
+    .tabs button {
+      margin-right: 10px;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h2>Papaya CookieMonster Login</h2>
-  <label for="username">Username:</label>
-  <input type="text" id="username" name="username">
-  <label for="password">Password:</label>
-  <input type="password" id="password" name="password">
-  <button id="loginButton">Login</button>
+  <div class="tabs">
+    <button id="loginTab">Login</button>
+    <button id="registerTab">Register</button>
+    <button id="preferencesTab">Preferences</button>
+  </div>
+
+  <div id="login" class="tab active">
+    <h2>Login</h2>
+    <label for="loginUsername">Username:</label>
+    <input type="text" id="loginUsername" name="username">
+    <label for="loginPassword">Password:</label>
+    <input type="password" id="loginPassword" name="password">
+    <button id="loginButton">Login</button>
+  </div>
+
+  <div id="register" class="tab">
+    <h2>Register</h2>
+    <label for="registerFirstname">First Name:</label>
+    <input type="text" id="registerFirstname" name="firstname">
+    <label for="registerLastname">Last Name:</label>
+    <input type="text" id="registerLastname" name="lastname">
+    <label for="registerEmail">Email:</label>
+    <input type="email" id="registerEmail" name="email">
+    <label for="registerPassword">Password:</label>
+    <input type="password" id="registerPassword" name="password">
+    <button id="registerButton">Register</button>
+  </div>
+
+  <div id="preferences" class="tab">
+    <h2>Set Preferences</h2>
+    <label for="marketing">Marketing Cookies:</label>
+    <input type="checkbox" id="marketing" name="marketing">
+    <label for="performance">Performance Cookies:</label>
+    <input type="checkbox" id="performance" name="performance">
+    <label for="sell_data">Sell Data:</label>
+    <input type="checkbox" id="sell_data" name="sell_data">
+    <button id="setPreferencesButton">Set Preferences</button>
+  </div>
 
   <script src="popup.js"></script>
 </body>
