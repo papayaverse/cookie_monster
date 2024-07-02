@@ -36,6 +36,7 @@ function fetchUserPreferences(domain, callback) {
         return response.json();
       })
       .then(data => {
+        console.log('Loading preferences for username:', credentials.username);
         console.log('User preferences loaded:', data);
         callback(data);
       })
