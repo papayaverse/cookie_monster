@@ -19,14 +19,14 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icon_papaya2.png",
-      "48": "icon_papaya2.png",
-      "128": "icon_papaya2.png"
+      "16": "icon_papaya.png",
+      "48": "icon_papaya.png",
+      "128": "icon_papaya.png"
     }
   },
   "icons": {
-    "16": "icon_papaya2.png",
-    "48": "icon_papaya2.png",
-    "128": "icon_papaya2.png"
+    "16": "icon_papaya.png",
+    "48": "icon_papaya.png",
+    "128": "icon_papaya.png"
   }
 }
