@@ -154,3 +154,34 @@ chrome.runtime.sendMessage({ action: 'getUserPreferences', domain: domain }, use
     });
   }
 });
+
+// Function to collect data from the webpage
+function collectData() {
+  const data = {
+    url: window.location.href,
+    title: document.title,
+    timestamp: new Date().toISOString()
+    // Add any other data you need to collect
+  };
+
+  // Send the data to the background script
+  chrome.runtime.sendMessage({ action: 'collectData', data: data });
+  console.log('Data collected:', data);
+}
+
+// Function to check user preferences and collect data if allowed
+function checkPreferencesAndCollectData() {
+  chrome.runtime.sendMessage({ action: 'getUserPreferences', domain: window.location.hostname }, userPreferences => {
+    if (chrome.runtime.lastError) {
+      console.error('Error fetching user preferences:', chrome.runtime.lastError.message);
+    } else {
+      if (userPreferences.sell_data) {
+        collectData();
+      }
+    }
+  });
+}
+
+// Call the function to check preferences and collect data
+checkPreferencesAndCollectData();
+

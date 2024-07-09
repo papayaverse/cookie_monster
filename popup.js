@@ -1,11 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('loginTab').addEventListener('click', showTab);
   document.getElementById('registerTab').addEventListener('click', showTab);
-  document.getElementById('preferencesTab').addEventListener('click', showTab);
+  document.getElementById('cookiePreferencesTab').addEventListener('click', showTab);
+  document.getElementById('paybackTab').addEventListener('click', showTab);
 
   document.getElementById('loginButton').addEventListener('click', loginUser);
   document.getElementById('registerButton').addEventListener('click', registerUser);
-  document.getElementById('setPreferencesButton').addEventListener('click', setPreferences);
+  document.getElementById('setCookiePreferencesButton').addEventListener('click', setCookiePreferences);
+  document.getElementById('setPaybackButton').addEventListener('click', setPayback);
+
+  loadPreferences();
 
   function showTab(event) {
     const tabs = document.querySelectorAll('.tab');
@@ -80,34 +84,64 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  function setPreferences() {
+  function setCookiePreferences() {
+    const marketing = document.getElementById('marketing').checked;
+    const performance = document.getElementById('performance').checked;
+
+    chrome.storage.local.set({ marketing, performance }, () => {
+      console.log('Cookie preferences saved');
+      alert('Cookie preferences saved successfully!');
+    });
+  }
+
+  function setPayback() {
     chrome.storage.local.get(['username', 'password'], (credentials) => {
       if (credentials.username && credentials.password) {
-        const marketing = document.getElementById('marketing').checked;
-        const performance = document.getElementById('performance').checked;
         const sell_data = document.getElementById('sell_data').checked;
-        const preferences = { marketing, performance, sell_data };
+        const preferences = { sell_data };
 
-        fetch('https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/preferences/default', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Basic ' + btoa(credentials.username + ':' + credentials.password),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(preferences)
-        })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to set preferences');
-          }
-          return response.json();
-        })
-        .then(data => {
-          alert(data.message);
-        })
-        .catch(error => console.error('Error setting preferences:', error));
+        chrome.storage.local.get(['marketing', 'performance'], (cookiePreferences) => {
+          preferences.marketing = cookiePreferences.marketing;
+          preferences.performance = cookiePreferences.performance;
+
+          fetch('https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/preferences/default', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Basic ' + btoa(credentials.username + ':' + credentials.password),
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(preferences)
+          })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to set preferences');
+            }
+            return response.json();
+          })
+          .then(data => {
+            alert(data.message);
+          })
+          .catch(error => console.error('Error setting preferences:', error));
+        });
       } else {
         alert('Please log in first.');
+      }
+    });
+  }
+
+  function loadPreferences() {
+    chrome.storage.local.get(['marketing', 'performance'], (preferences) => {
+      if (preferences.marketing !== undefined) {
+        document.getElementById('marketing').checked = preferences.marketing;
+      }
+      if (preferences.performance !== undefined) {
+        document.getElementById('performance').checked = preferences.performance;
+      }
+    });
+
+    chrome.storage.local.get(['sell_data'], (preferences) => {
+      if (preferences.sell_data !== undefined) {
+        document.getElementById('sell_data').checked = preferences.sell_data;
       }
     });
   }

@@ -19,7 +19,7 @@
     }
     button {
       padding: 10px;
-      background-color: orangered;
+      background-color: #007bff;
       color: white;
       border: none;
       cursor: pointer;
@@ -27,8 +27,8 @@
     .tabs button {
       margin-right: 10px;
       padding: 10px;
-      background-color: gray;
-      color: black;
+      background-color: #007bff;
+      color: white;
       border: none;
       cursor: pointer;
     }
@@ -38,10 +38,11 @@
   <div class="tabs">
     <button id="loginTab">Login</button>
     <button id="registerTab">Register</button>
-    <button id="preferencesTab">Preferences</button>
+    <button id="cookiePreferencesTab">Cookie Preferences</button>
+    <button id="paybackTab">Payback</button>
   </div>
 
-  <div id="login" class="tab active">
+  <div id="login" class="tab">
     <h2>Login</h2>
     <label for="loginUsername">Username:</label>
     <input type="text" id="loginUsername" name="username">
@@ -63,17 +64,23 @@
     <button id="registerButton">Register</button>
   </div>
 
-  <div id="preferences" class="tab">
-    <h2>Set Preferences</h2>
+  <div id="cookiePreferences" class="tab active">
+    <h2>Cookie Preferences</h2>
     <label for="marketing">Marketing Cookies:</label>
     <input type="checkbox" id="marketing" name="marketing">
     <label for="performance">Performance Cookies:</label>
     <input type="checkbox" id="performance" name="performance">
+    <button id="setCookiePreferencesButton">Set Preferences</button>
+  </div>
+
+  <div id="payback" class="tab">
+    <h2>Payback</h2>
     <label for="sell_data">Sell Data:</label>
     <input type="checkbox" id="sell_data" name="sell_data">
-    <button id="setPreferencesButton">Set Preferences</button>
+    <button id="setPaybackButton">Set Payback</button>
   </div>
 
   <script src="popup.js"></script>
 </body>
 </html>
+
