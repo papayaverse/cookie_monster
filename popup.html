@@ -13,14 +13,14 @@
     .tab.active {
       display: block;
     }
-    label, input, button {
+    label, input, select, button {
       display: block;
       margin-bottom: 10px;
     }
     button {
       padding: 10px;
-      background-color: skyblue;
-      color: black;
+      background-color: #007bff;
+      color: white;
       border: none;
       cursor: pointer;
     }
@@ -75,12 +75,30 @@
 
   <div id="payback" class="tab">
     <h2>Payback</h2>
-    <label for="sell_data">Sell Data:</label>
-    <input type="checkbox" id="sell_data" name="sell_data">
+    <label for="dataType">I am willing to sell:</label>
+    <select id="dataType">
+      <option value="browsing_data">Browsing Data</option>
+      <option value="purchase_history">Purchase History</option>
+      <option value="location_data">Location Data</option>
+    </select>
+
+    <label for="recipient">to:</label>
+    <select id="recipient">
+      <option value="advertising_companies">Advertising Companies</option>
+      <option value="data_brokers">Data Brokers</option>
+      <option value="market_research_firms">Market Research Firms</option>
+    </select>
+
+    <label for="purpose">for:</label>
+    <select id="purpose">
+      <option value="marketing">Marketing</option>
+      <option value="research">Research</option>
+      <option value="analytics">Analytics</option>
+    </select>
+
     <button id="setPaybackButton">Set Payback</button>
   </div>
 
   <script src="popup.js"></script>
 </body>
 </html>
-

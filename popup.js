@@ -87,21 +87,21 @@ document.addEventListener('DOMContentLoaded', function() {
   function setCookiePreferences() {
     const marketing = document.getElementById('marketing').checked;
     const performance = document.getElementById('performance').checked;
-  
+
     // Save preferences locally
     chrome.storage.local.set({ marketing, performance }, () => {
       console.log('Cookie preferences saved locally');
       alert('Cookie preferences saved successfully!');
-  
-      // Check if the user is logged in and get sell_data if it exists
-      chrome.storage.local.get(['username', 'password', 'sell_data'], (credentials) => {
+
+      // Check if the user is logged in
+      chrome.storage.local.get(['username', 'password'], (credentials) => {
         if (credentials.username && credentials.password) {
           const preferences = { 
             marketing, 
             performance, 
             sell_data: credentials.sell_data !== undefined ? credentials.sell_data : false 
           };
-  
+
           // Post preferences to the server
           fetch('https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/preferences/default', {
             method: 'POST',
@@ -125,37 +125,38 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
   }
-  
 
   function setPayback() {
     chrome.storage.local.get(['username', 'password'], (credentials) => {
       if (credentials.username && credentials.password) {
-        const sell_data = document.getElementById('sell_data').checked;
-        const preferences = { sell_data };
+        const dataType = document.getElementById('dataType').value;
+        const recipient = document.getElementById('recipient').value;
+        const purpose = document.getElementById('purpose').value;
 
-        chrome.storage.local.get(['marketing', 'performance'], (cookiePreferences) => {
-          preferences.marketing = cookiePreferences.marketing;
-          preferences.performance = cookiePreferences.performance;
+        const paybackPreferences = {
+          data_type: dataType,
+          recipient: recipient,
+          purpose: purpose
+        };
 
-          fetch('https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/preferences/default', {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Basic ' + btoa(credentials.username + ':' + credentials.password),
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(preferences)
-          })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Failed to set preferences');
-            }
-            return response.json();
-          })
-          .then(data => {
-            alert(data.message);
-          })
-          .catch(error => console.error('Error setting preferences:', error));
-        });
+        fetch('https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/payback', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Basic ' + btoa(credentials.username + ':' + credentials.password),
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(paybackPreferences)
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to set payback preferences');
+          }
+          return response.json();
+        })
+        .then(data => {
+          alert(data.message);
+        })
+        .catch(error => console.error('Error setting payback preferences:', error));
       } else {
         alert('Please log in first.');
       }
