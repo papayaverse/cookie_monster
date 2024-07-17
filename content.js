@@ -72,16 +72,14 @@ function handleCookieBanner(buttons, preferences) {
             buttons.internal_buttons.forEach(button => {
               if (button.option_name === 'accept_all') {
                 const acceptAllClicked = findAndClickButton(button);
-                if (acceptAllClicked) {
                   // Click confirm my preferences after accept all
-                  setTimeout(() => {
-                    buttons.internal_buttons.forEach(button => {
-                      if (button.option_name === 'confirm_my_preferences') {
-                        findAndClickButton(button);
-                      }
-                    });
-                  }, 2000);
-                }
+                setTimeout(() => {
+                  buttons.internal_buttons.forEach(button => {
+                    if (button.option_name === 'confirm_my_preferences') {
+                      findAndClickButton(button);
+                    }
+                  });
+                }, 2000);
               }
             });
           }
@@ -106,17 +104,15 @@ function handleCookieBanner(buttons, preferences) {
           if (buttons.internal_buttons) {
             buttons.internal_buttons.forEach(button => {
               if (button.option_name === 'reject_all') {
-                const rejectAllClicked = findAndClickButton(button);
-                if (rejectAllClicked) {
-                  // Click confirm my preferences after reject all
-                  setTimeout(() => {
-                    buttons.internal_buttons.forEach(button => {
-                      if (button.option_name === 'confirm_my_preferences') {
-                        findAndClickButton(button);
-                      }
-                    });
-                  }, 2000);
-                }
+              const rejectAllClicked = findAndClickButton(button);
+                // Click confirm my preferences after reject all
+                setTimeout(() => {
+                  buttons.internal_buttons.forEach(button => {
+                    if (button.option_name === 'confirm_my_preferences') {
+                      findAndClickButton(button);
+                    }
+                  });
+                }, 2000);
               }
             });
           }
@@ -139,11 +135,12 @@ function handleCookieBanner(buttons, preferences) {
 const domain = window.location.hostname.replace('www.', '');
 
 // Request user preferences and button data from the background script
-chrome.runtime.sendMessage({ action: 'getUserPreferences', domain: domain }, userPreferences => {
+//chrome.runtime.sendMessage({ action: 'getUserPreferences', domain: domain }, userPreferences => {
+chrome.storage.local.get(['marketing', 'performance'], (userPreferences) => {
   if (chrome.runtime.lastError) {
     console.error('Error fetching user preferences:', chrome.runtime.lastError.message);
   } else {
-    console.log('User preferences received from background script:', userPreferences);
+    console.log('User preferences received from local storage :', userPreferences);
     chrome.runtime.sendMessage({ action: 'getButtonData', domain: domain }, buttonData => {
       if (chrome.runtime.lastError) {
         console.error('Error fetching button data:', chrome.runtime.lastError.message);
@@ -169,19 +166,6 @@ function collectData() {
   console.log('Data collected:', data);
 }
 
-// Function to check user preferences and collect data if allowed
-function checkPreferencesAndCollectData() {
-  chrome.runtime.sendMessage({ action: 'getUserPreferences', domain: window.location.hostname }, userPreferences => {
-    if (chrome.runtime.lastError) {
-      console.error('Error fetching user preferences:', chrome.runtime.lastError.message);
-    } else {
-      if (userPreferences.sell_data) {
-        collectData();
-      }
-    }
-  });
-}
-
 // Call the function to check preferences and collect data
-checkPreferencesAndCollectData();
+collectData();
 

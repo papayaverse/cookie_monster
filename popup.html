@@ -13,14 +13,14 @@
     .tab.active {
       display: block;
     }
-    label, input, select, button {
+    label, input, button {
       display: block;
       margin-bottom: 10px;
     }
     button {
       padding: 10px;
-      background-color: #007bff;
-      color: white;
+      background-color: cyan;
+      color: black;
       border: none;
       cursor: pointer;
     }
@@ -36,32 +36,8 @@
 </head>
 <body>
   <div class="tabs">
-    <button id="loginTab">Login</button>
-    <button id="registerTab">Register</button>
     <button id="cookiePreferencesTab">Cookie Preferences</button>
-    <button id="paybackTab">Payback</button>
-  </div>
-
-  <div id="login" class="tab">
-    <h2>Login</h2>
-    <label for="loginUsername">Username:</label>
-    <input type="text" id="loginUsername" name="username">
-    <label for="loginPassword">Password:</label>
-    <input type="password" id="loginPassword" name="password">
-    <button id="loginButton">Login</button>
-  </div>
-
-  <div id="register" class="tab">
-    <h2>Register</h2>
-    <label for="registerFirstname">First Name:</label>
-    <input type="text" id="registerFirstname" name="firstname">
-    <label for="registerLastname">Last Name:</label>
-    <input type="text" id="registerLastname" name="lastname">
-    <label for="registerEmail">Email:</label>
-    <input type="email" id="registerEmail" name="email">
-    <label for="registerPassword">Password:</label>
-    <input type="password" id="registerPassword" name="password">
-    <button id="registerButton">Register</button>
+    <button id="loginTab">Login to Payback</button>
   </div>
 
   <div id="cookiePreferences" class="tab active">
@@ -73,30 +49,13 @@
     <button id="setCookiePreferencesButton">Set Preferences</button>
   </div>
 
-  <div id="payback" class="tab">
-    <h2>Payback</h2>
-    <label for="dataType">I am willing to sell:</label>
-    <select id="dataType">
-      <option value="browsing_data">Browsing Data</option>
-      <option value="purchase_history">Purchase History</option>
-      <option value="location_data">Location Data</option>
-    </select>
-
-    <label for="recipient">to:</label>
-    <select id="recipient">
-      <option value="advertising_companies">Advertising Companies</option>
-      <option value="data_brokers">Data Brokers</option>
-      <option value="market_research_firms">Market Research Firms</option>
-    </select>
-
-    <label for="purpose">for:</label>
-    <select id="purpose">
-      <option value="marketing">Marketing</option>
-      <option value="research">Research</option>
-      <option value="analytics">Analytics</option>
-    </select>
-
-    <button id="setPaybackButton">Set Payback</button>
+  <div id="login" class="tab">
+    <h2>Login to Payback</h2>
+    <label for="loginUsername">Username:</label>
+    <input type="text" id="loginUsername" name="username">
+    <label for="loginPassword">Password:</label>
+    <input type="password" id="loginPassword" name="password">
+    <button id="loginButton">Login</button>
   </div>
 
   <script src="popup.js"></script>
