@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Papaya CookieMonster",
-  "version": "2.0",
+  "version": "3.1",
   "permissions": ["storage", "activeTab", "cookies", "scripting"],
   "host_permissions": [
     "http://*/*",
@@ -19,14 +19,14 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icon_papaya.png",
-      "48": "icon_papaya.png",
-      "128": "icon_papaya.png"
+      "16": "cookie_monster_logo_nobg.png",
+      "48": "cookie_monster_logo_nobg.png",
+      "128": "cookie_monster_logo_nobg.png"
     }
   },
   "icons": {
-    "16": "icon_papaya.png",
-    "48": "icon_papaya.png",
-    "128": "icon_papaya.png"
+    "16": "cookie_monster_logo_nobg.png",
+    "48": "cookie_monster_logo_nobg.png",
+    "128": "cookie_monster_logo_nobg.png"
   }
 }

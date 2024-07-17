@@ -32,19 +32,23 @@
       border: none;
       cursor: pointer;
     }
+    .disabled {
+      background-color: grey;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
   <div class="tabs">
     <button id="cookiePreferencesTab">Cookie Preferences</button>
-    <button id="loginTab">Login to Payback</button>
+    <button id="loginTab" class="disabled" disabled>Payback (Coming Soon)</button>
   </div>
 
   <div id="cookiePreferences" class="tab active">
     <h2>Cookie Preferences</h2>
-    <label for="marketing">Marketing Cookies:</label>
+    <label for="marketing">Allow Marketing Cookies:</label>
     <input type="checkbox" id="marketing" name="marketing">
-    <label for="performance">Performance Cookies:</label>
+    <label for="performance">Allow Performance Cookies:</label>
     <input type="checkbox" id="performance" name="performance">
     <button id="setCookiePreferencesButton">Set Preferences</button>
   </div>
