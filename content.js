@@ -134,17 +134,25 @@ function handleCookieBanner(buttons, preferences) {
 
 function getBaseDomain(url) {
   const hostname = url.hostname;
-  const parts = hostname.split('.').reverse();
+  const domainParts = hostname.split('.');
+  
+  // Known common TLDs that consist of multiple parts
+  const knownTLDs = [
+    'co.uk', 'org.uk', 'gov.uk', 'ac.uk',
+    'com.au', 'net.au', 'org.au',
+    'co.in', 'net.in', 'org.in',
+    // Add more if needed
+  ];
 
-  if (parts.length > 2) {
-    // This assumes that the domain has a subdomain (e.g., sub.example.com)
-    // For something like 'www.example.co.uk', parts would be ['uk', 'co', 'example', 'www']
-    // So we return the second and third last parts as the base domain
-    return parts[1] + '.' + parts[0];
-  } else {
-    // This handles the case where there's no subdomain (e.g., example.com)
-    return hostname;
+  // Check if the hostname ends with one of the known TLDs
+  for (let tld of knownTLDs) {
+    if (hostname.endsWith(tld)) {
+      return domainParts.slice(-3).join('.'); // Take the last 3 parts (subdomain + domain + TLD)
+    }
   }
+
+  // If not, assume the last 2 parts are the domain (like example.com or example.co.uk)
+  return domainParts.slice(-2).join('.');
 }
 
 const domain = getBaseDomain(window.location);
