@@ -132,7 +132,23 @@ function handleCookieBanner(buttons, preferences) {
   }, 2000); // Adjust delay as needed for your pages
 }
 
-const domain = window.location.hostname.replace('www.', '');
+function getBaseDomain(url) {
+  const hostname = url.hostname;
+  const parts = hostname.split('.').reverse();
+
+  if (parts.length > 2) {
+    // This assumes that the domain has a subdomain (e.g., sub.example.com)
+    // For something like 'www.example.co.uk', parts would be ['uk', 'co', 'example', 'www']
+    // So we return the second and third last parts as the base domain
+    return parts[1] + '.' + parts[0];
+  } else {
+    // This handles the case where there's no subdomain (e.g., example.com)
+    return hostname;
+  }
+}
+
+const domain = getBaseDomain(window.location);
+
 
 // Request user preferences and button data from the background script
 //chrome.runtime.sendMessage({ action: 'getUserPreferences', domain: domain }, userPreferences => {
