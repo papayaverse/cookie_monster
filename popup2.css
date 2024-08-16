@@ -1,13 +1,12 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
-    margin: 0;
-    padding: 20px;
-    max-width: 400px;
-    min-width: 350px;  /* Adjust width */
-    min-height: 500px; /* Adjust height */
-    border-radius: 15px;
-    overflow: hidden;
+  body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 20px;
+  min-width: 350px;  /* Adjust width */
+  min-height: 500px; /* Adjust height */
+  border-radius: 5px; /* Add rounded corners */
+  overflow: hidden; /* Prevent content from overflowing the rounded corners */
   }
   
   .container {
