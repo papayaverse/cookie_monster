@@ -1,3 +1,17 @@
+// functions to change icon
+
+function updateIconToActive() {
+  console.log('Active Icon set');
+  chrome.runtime.sendMessage({ action: 'updateIcon', icon: 'active' });
+}
+
+function updateIconToDefault() {
+  console.log('Default Icon set');
+  chrome.runtime.sendMessage({ action: 'updateIcon', icon: 'default' });
+}
+
+
+
 // Function to handle cookie banners
 function handleCookieBanner(buttons, preferences) {
   if (!buttons) {
@@ -121,15 +135,19 @@ function handleCookieBanner(buttons, preferences) {
       }
     }
   }
-
-  // Wait for external buttons to load
   setTimeout(() => {
+    updateIconToActive();
     if (actionType === 'accept_all') {
       handleAcceptAll();
     } else {
       handleRejectAll();
     }
+    setTimeout(() => {
+      updateIconToDefault(); // Revert back to the default icon after a short delay
+    }, 1000);
   }, 2000); // Adjust delay as needed for your pages
+
+
 }
 
 function getBaseDomain(url) {
