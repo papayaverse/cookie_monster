@@ -2,36 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Papaya CookieMonster</title>
   <link rel="stylesheet" href="popup2.css">
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Papaya CookieMonster</h1>
-      <input type="text" id="search" placeholder="Search...">
+  <div class="top-bar">
+    <div class="title">Papaya CookieMonster</div>
+    <div class="menu" id="menuButton">☰</div>
+  </div>
+  
+  <div class="menu-items" id="menuItems">
+    <a href="#" id="dashboardLink">Dashboard</a>
+    <a href="#" id="cookiePreferencesLink">Cookie Preferences</a>
+    <a href="#" id="paybackLink">Payback</a>
+  </div>
+
+  <div class="content" id="content">
+    <div id="dashboard" class="tab-content">
+      <h2>Dashboard</h2>
+      <p>Coming soon...</p>
     </div>
-    <div class="grid">
-      <div class="card">
-        <h3>Marketing Cookies</h3>
-        <label>
-          <input type="checkbox" id="marketing">
-          Enable
-        </label>
-      </div>
-      <div class="card">
-        <h3>Performance Cookies</h3>
-        <label>
-          <input type="checkbox" id="performance">
-          Enable
-        </label>
-      </div>
-      <div class="card">
-        <h3>Login to Payback</h3>
-        <button id="loginButton">Login</button>
-      </div>
-      <!-- Add more cards as needed -->
+    <div id="cookiePreferences" class="tab-content" style="display: none;">
+      <h2>Cookie Preferences</h2>
+      <label>
+        <input type="checkbox" id="marketing"> Enable Marketing Cookies
+      </label><br>
+      <label>
+        <input type="checkbox" id="performance"> Enable Performance Cookies
+      </label>
+      <button id="savePreferences">Save Preferences</button>
+    </div>
+    <div id="payback" class="tab-content" style="display: none;">
+      <h2>Payback</h2>
+      <button id="loginButton">Login</button>
     </div>
   </div>
 

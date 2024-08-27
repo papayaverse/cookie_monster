@@ -144,7 +144,7 @@ function handleCookieBanner(buttons, preferences) {
     }
     setTimeout(() => {
       updateIconToDefault(); // Revert back to the default icon after a short delay
-    }, 1000);
+    }, 3000);
   }, 2000); // Adjust delay as needed for your pages
 
 
