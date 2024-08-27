@@ -1,14 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-  const menuButton = document.getElementById('menuButton');
-  const menuItems = document.getElementById('menuItems');
-  const content = document.getElementById('content');
-
-  // Toggle the menu display
-  menuButton.addEventListener('click', function() {
-    menuItems.style.display = menuItems.style.display === 'block' ? 'none' : 'block';
-  });
-
-  // Switch between tabs
+  // Switch between tabs when sidebar items are clicked
   document.getElementById('dashboardLink').addEventListener('click', function() {
     showTab('dashboard');
   });
@@ -23,11 +14,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function showTab(tabId) {
     // Hide all tab contents
-    const tabs = content.querySelectorAll('.tab-content');
-    tabs.forEach(tab => tab.classList.remove('active'));
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.style.display = 'none');
 
     // Show the selected tab
-    document.getElementById(tabId).classList.add('active');
+    document.getElementById(tabId).style.display = 'block';
+
+    // Update active state in the sidebar
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
+    sidebarItems.forEach(item => item.style.backgroundColor = '');
+    document.getElementById(tabId + 'Link').style.backgroundColor = '#444';
   }
 
   // Initialize the first tab as active

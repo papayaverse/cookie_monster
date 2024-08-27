@@ -9,33 +9,36 @@
 <body>
   <div class="top-bar">
     <div class="title">Papaya CookieMonster</div>
-    <div class="menu" id="menuButton">☰</div>
   </div>
-  
-  <div class="menu-items" id="menuItems">
-    <a href="#" id="dashboardLink">Dashboard</a>
-    <a href="#" id="cookiePreferencesLink">Cookie Preferences</a>
-    <a href="#" id="paybackLink">Payback</a>
-  </div>
-
-  <div class="content" id="content">
-    <div id="dashboard" class="tab-content">
-      <h2>Dashboard</h2>
-      <p>Coming soon...</p>
+  <div class="container">
+    <div class="sidebar">
+      <div class="sidebar-item" id="dashboardLink">Dashboard</div>
+      <div class="sidebar-item" id="cookiePreferencesLink">Cookie Preferences</div>
+      <div class="sidebar-item" id="paybackLink">Payback</div>
     </div>
-    <div id="cookiePreferences" class="tab-content" style="display: none;">
-      <h2>Cookie Preferences</h2>
-      <label>
-        <input type="checkbox" id="marketing"> Enable Marketing Cookies
-      </label><br>
-      <label>
-        <input type="checkbox" id="performance"> Enable Performance Cookies
-      </label>
-      <button id="savePreferences">Save Preferences</button>
-    </div>
-    <div id="payback" class="tab-content" style="display: none;">
-      <h2>Payback</h2>
-      <button id="loginButton">Login</button>
+    <div class="content" id="content">
+      <div id="dashboard" class="tab-content">
+        <h2>Dashboard</h2>
+        <p>Coming soon...</p>
+      </div>
+      <div id="cookiePreferences" class="tab-content" style="display: none;">
+        <h2>Cookie Preferences</h2>
+        <label>
+          <input type="checkbox" id="marketing"> Enable Marketing Cookies
+        </label><br>
+        <label>
+          <input type="checkbox" id="performance"> Enable Performance Cookies
+        </label>
+        <button id="savePreferences">Save Preferences</button>
+      </div>
+      <div id="payback" class="tab-content" style="display: none;">
+        <h2>Payback</h2>
+        <label for="loginUsername">Username:</label>
+        <input type="text" id="loginUsername" name="username">
+        <label for="loginPassword">Password:</label>
+        <input type="password" id="loginPassword" name="password">
+        <button id="loginButton" class="disabled" disabled>Login</button>
+      </div>
     </div>
   </div>
 
