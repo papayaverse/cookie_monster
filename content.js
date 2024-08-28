@@ -137,6 +137,8 @@ function handleCookieBanner(buttons, preferences) {
   }
   setTimeout(() => {
     updateIconToActive();
+    // Notify background script that a banner was clicked
+    chrome.runtime.sendMessage({ action: 'bannerClicked' });
     if (actionType === 'accept_all') {
       handleAcceptAll();
     } else {

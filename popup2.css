@@ -71,8 +71,23 @@ button {
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
-  width: 100%; /* Make buttons full width */
+  width: 80%; /* Make buttons 80 percent width */
   box-sizing: border-box;
+  margin-top: 10px; /* Add spacing between buttons */
+}
+
+a.btn {
+  background-color: #ff7d10;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 80%; /* Make buttons 80 percent width */
+  box-sizing: border-box;
+  margin-top: 10px; /* Add spacing between buttons */
+  margin-bottom: 10px; /* Add spacing between buttons */
 }
 
 button:disabled {
@@ -84,6 +99,12 @@ label {
   display: block;
   margin-bottom: 10px; /* Add spacing between labels */
 }
+
+p {
+  display: block;
+  margin-bottom: 10px; /* Add spacing between labels */
+}
+
 
 h2 {
   font-size: 16px;

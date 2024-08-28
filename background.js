@@ -15,6 +15,11 @@ const loadButtonData = () => {
     });
 };
 
+chrome.runtime.onInstalled.addListener(() => {
+  // Initialize counters on first install
+  chrome.storage.local.set({ totalClicks: 0, uniqueSites: {} });
+});
+
 // Call the loadButtonData function and store the Promise
 const buttonDataPromise = loadButtonData();
 
@@ -62,6 +67,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       iconPath = 'cookie_monster_small.png'; // Path to your default icon
     }
     chrome.action.setIcon({ path: iconPath, tabId: sender.tab.id });
+  } else if (message.action === 'bannerClicked') {
+    const domain = new URL(sender.tab.url).hostname;
+    function updateClickData(domain) {
+      chrome.storage.local.get(['totalClicks', 'uniqueSites'], (data) => {
+        const { totalClicks, uniqueSites } = data;
+        const newTotalClicks = totalClicks + 1;
+        
+        const updatedUniqueSites = { ...uniqueSites };
+        if (!updatedUniqueSites[domain]) {
+          updatedUniqueSites[domain] = true; // Mark this site as clicked
+        }
+    
+        chrome.storage.local.set({ totalClicks: newTotalClicks, uniqueSites: updatedUniqueSites });
+      });
+    }
+    updateClickData(domain);
   }
 });
+
 

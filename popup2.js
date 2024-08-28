@@ -52,4 +52,17 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('Preferences saved successfully!');
     });
   }
+  
+  function updateDashboard() {
+    chrome.storage.local.get(['totalClicks', 'uniqueSites'], (data) => {
+      const { totalClicks, uniqueSites } = data;
+      const uniqueSitesCount = Object.keys(uniqueSites).length;
+  
+      document.getElementById('totalClicks').textContent = `Total Clicks: ${totalClicks}`;
+      document.getElementById('uniqueSites').textContent = `Unique Websites: ${uniqueSitesCount}`;
+    });
+  }
+
+  updateDashboard();
+  
 });
