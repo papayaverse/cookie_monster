@@ -58,8 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const { totalClicks, uniqueSites } = data;
       const uniqueSitesCount = Object.keys(uniqueSites).length;
   
-      document.getElementById('totalClicks').textContent = `Total Clicks: ${totalClicks}`;
-      document.getElementById('uniqueSites').textContent = `Unique Websites: ${uniqueSitesCount}`;
+      document.getElementById('totalClicks').textContent = `${totalClicks} Cookie Banners on`;
+      document.getElementById('uniqueSites').textContent = `${uniqueSitesCount} Unique Websites`;
     });
   }
 
