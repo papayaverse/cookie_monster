@@ -17,7 +17,10 @@ const loadButtonData = () => {
 
 chrome.runtime.onInstalled.addListener(() => {
   // Initialize counters on first install
-  chrome.storage.local.set({ totalClicks: 0, uniqueSites: {} });
+  if (details.reason === 'install') {
+    // Only initialize counters on first install, not on update
+    chrome.storage.local.set({ totalClicks: 0, uniqueSites: {} });
+  }
 });
 
 // Call the loadButtonData function and store the Promise
