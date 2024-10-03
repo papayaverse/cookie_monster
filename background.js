@@ -74,14 +74,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const domain = new URL(sender.tab.url).hostname;
     function updateClickData(domain) {
       chrome.storage.local.get(['totalClicks', 'uniqueSites'], (data) => {
-        const { totalClicks, uniqueSites } = data;
+        let { totalClicks, uniqueSites } = data;
+        if (!totalClicks) {
+          totalClicks = 0;
+        }
+        if (!uniqueSites) {
+          uniqueSites = {};
+        }
         const newTotalClicks = totalClicks + 1;
-        
         const updatedUniqueSites = { ...uniqueSites };
         if (!updatedUniqueSites[domain]) {
           updatedUniqueSites[domain] = true; // Mark this site as clicked
         }
-    
         chrome.storage.local.set({ totalClicks: newTotalClicks, uniqueSites: updatedUniqueSites });
       });
     }
