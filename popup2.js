@@ -43,14 +43,76 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Save preferences to the backend
+  function saveBackendCookiePreferences(cookiePreferences) {
+    return new Promise((resolve, reject) => {
+        chrome.storage.local.get(['userIdentifier'], (data) => {
+            const userIdentifier = data.userIdentifier;
+            const identifierParam = userIdentifier ? userIdentifier : 'null';
+            const apiUrl = `https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/cookiePreferences?identifier=${encodeURIComponent(identifierParam)}`;
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(cookiePreferences)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to save preferences. Status: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Server response:', data);
+                if (data.id && !userIdentifier) {
+                    // Store the returned ID in local storage if it's not already stored
+                    chrome.storage.local.set({ userIdentifier: data.id }, () => {
+                        console.log(`Preferences saved successfully for ID: ${data.id}`);
+                        //alert('Cookie preferences saved successfully!');
+                        resolve();
+                    });
+                } else {
+                    //alert('Cookie preferences saved successfully!');
+                    resolve();
+                }
+            })
+            .catch(error => {
+                console.error('Error saving preferences:', error);
+                reject(error);
+            });
+        });
+    });
+  }
+
+
+
   // Save preferences to storage
   function savePreferences() {
     const marketing = document.getElementById('marketing').checked;
     const performance = document.getElementById('performance').checked;
 
     chrome.storage.local.set({ marketing, performance }, () => {
-      alert('Preferences saved successfully!');
+      //alert('Cookie preferences saved locally successfully!');
+      alert('Cookie preferences saved successfully!');
     });
+
+    const cookiePreferences = {
+      allow_marketing: marketing,
+      allow_performance: performance
+    };
+
+  // Call the backend function to save preferences
+  saveBackendCookiePreferences(cookiePreferences)
+      .then(() => {
+          console.log('Preferences saved to the server successfully');
+      })
+      .catch((error) => {
+          alert('Error saving preferences to the server: ' + error.message);
+          console.error('Error saving preferences to the server:', error);
+      });
+
+
   }
   
   function updateDashboard() {

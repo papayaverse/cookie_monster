@@ -15,9 +15,9 @@ const loadButtonData = () => {
     });
 };
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener((details) => {
   // Initialize counters on first install
-  if (details.reason === 'install') {
+  if ((details) && details.reason === 'install') {
     // Only initialize counters on first install, not on update
     chrome.storage.local.set({ totalClicks: 0, uniqueSites: {} });
   }
@@ -92,5 +92,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     updateClickData(domain);
   }
 });
+
 
 
