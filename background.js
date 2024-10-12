@@ -16,12 +16,48 @@ const loadButtonData = () => {
 };
 
 chrome.runtime.onInstalled.addListener((details) => {
-  // Initialize counters on first install
-  if ((details) && details.reason === 'install') {
-    // Only initialize counters on first install, not on update
-    chrome.storage.local.set({ totalClicks: 0, uniqueSites: {} });
+  if (details && details.reason === 'install') {
+    // Initialize counters on first install
+    chrome.storage.local.set({ totalClicks: 0, uniqueSites: {} }, () => {
+      console.log('Counters initialized on first install.');
+    });
+
+    // Collect cookie preferences for the first time after install
+    collectCookiePreferences();
+  } else if (details && details.reason === 'update') {
+    // Collect preferences after an extension update
+    collectCookiePreferences();
+    console.log('Extension updated, collecting preferences.');
   }
 });
+
+// Function to collect cookie preferences
+function collectCookiePreferences() {
+  // Check if preferences are already saved
+  chrome.storage.local.get(['marketing', 'performance'], (data) => {
+    if (data.marketing !== undefined && data.performance !== undefined) {
+      console.log('Preferences already exist, no need to collect again.');
+      // Send the existing preferences to the backend 
+      const cPrefs = {
+        allow_marketing: data.marketing,
+        allow_performance: data.performance
+      }
+      saveBackendCookiePreferences(cPrefs);
+    } else {
+      // If preferences don't exist, collect them (you could trigger the popup or save defaults)
+      const defaultPreferences = {
+        allow_marketing: false,
+        allow_performance: false
+      };
+      
+      chrome.storage.local.set({ marketing: defaultPreferences.allow_marketing, performance: defaultPreferences.allow_performance }, () => {
+        console.log('Default preferences saved locally.');
+        // Optionally, send these preferences to the backend
+        saveBackendCookiePreferences(defaultPreferences);
+      });
+    }
+  });
+}
 
 // Call the loadButtonData function and store the Promise
 const buttonDataPromise = loadButtonData();
@@ -93,5 +129,46 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
+// Save preferences to the backend
+function saveBackendCookiePreferences(cookiePreferences) {
+  return new Promise((resolve, reject) => {
+      chrome.storage.local.get(['userIdentifier'], (data) => {
+          const userIdentifier = data.userIdentifier;
+          const identifierParam = userIdentifier ? userIdentifier : 'null';
+          const apiUrl = `https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/cookiePreferences?identifier=${encodeURIComponent(identifierParam)}`;
+          fetch(apiUrl, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(cookiePreferences)
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Failed to save preferences. Status: ' + response.status);
+              }
+              return response.json();
+          })
+          .then(data => {
+              console.log('Server response:', data);
+              if (data.id && !userIdentifier) {
+                  // Store the returned ID in local storage if it's not already stored
+                  chrome.storage.local.set({ userIdentifier: data.id }, () => {
+                      //alert(`Preferences saved successfully for ID: ${data.id}`);
+                      //alert('Cookie preferences saved successfully!');
+                      resolve();
+                  });
+              } else {
+                  //alert('Cookie preferences saved successfully for id ' + userIdentifier);
+                  resolve();
+              }
+          })
+          .catch(error => {
+              console.error('Error saving preferences:', error);
+              reject(error);
+          });
+      });
+  });
+}
 
 

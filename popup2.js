@@ -68,12 +68,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.id && !userIdentifier) {
                     // Store the returned ID in local storage if it's not already stored
                     chrome.storage.local.set({ userIdentifier: data.id }, () => {
-                        alert(`Preferences saved successfully for ID: ${data.id}`);
+                        //alert(`Preferences saved successfully for ID: ${data.id}`);
                         //alert('Cookie preferences saved successfully!');
                         resolve();
                     });
                 } else {
-                    alert('Cookie preferences saved successfully for id ' + userIdentifier);
+                    //alert('Cookie preferences saved successfully for id ' + userIdentifier);
                     resolve();
                 }
             })
@@ -84,9 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
   }
-
-
-
   // Save preferences to storage
   function savePreferences() {
     const marketing = document.getElementById('marketing').checked;
@@ -94,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     chrome.storage.local.set({ marketing, performance }, () => {
       //alert('Cookie preferences saved locally successfully!');
-      alert('Cookie preferences saved successfully!');
+      console.log('Cookie preferences saved locally successfully!');
     });
 
     const cookiePreferences = {
@@ -105,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Call the backend function to save preferences
   saveBackendCookiePreferences(cookiePreferences)
       .then(() => {
-          alert('Preferences saved to the server successfully');
+          alert('Cookie Preferences saved successfully');
       })
       .catch((error) => {
           alert('Error saving preferences to the server: ' + error.message);
