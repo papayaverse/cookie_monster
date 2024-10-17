@@ -30,5 +30,11 @@
     "16": "cookie_monster_logo_nobg.png",
     "48": "cookie_monster_logo_nobg.png",
     "128": "cookie_monster_logo_nobg.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["cookie_monster_logo_nobg.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

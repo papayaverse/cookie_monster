@@ -10,6 +10,37 @@ function updateIconToDefault() {
   chrome.runtime.sendMessage({ action: 'updateIcon', icon: 'default' });
 }
 
+// Function to inject the monster (PNG) into the DOM
+function injectMonster() {
+      // Create an image element for the monster (PNG)
+      console.log("Injecting monster");
+      const monsterImg = document.createElement('img');
+      // Use a relative path to the PNG within your extension
+      monsterImg.src = chrome.runtime.getURL('cookie_monster_logo_nobg.png'); // Path to your PNG file
+      // Set styles for the monster image
+      monsterImg.style.position = 'fixed';
+      monsterImg.style.zIndex = '10000000000'; // Ensure it's on top of other elements
+      monsterImg.style.height = '200px';  // Adjust height as needed
+      monsterImg.style.width = '200px';   // Adjust width as needed
+      monsterImg.style.top = '50%';        // Center the monster vertically
+      monsterImg.style.left = '0px';    // Start the monster off-screen on the left
+      monsterImg.style.transform = 'translateY(-50%)';  // Vertically center the monster
+
+      // Inject the monster (PNG) into the DOM
+      document.body.appendChild(monsterImg);
+
+      // Animate the monster to move towards the cookie banner's position
+      setTimeout(() => {
+        monsterImg.style.transition = 'transform 4s linear';  // Set up the transition
+        monsterImg.style.transform = 'translate(100vw, -50%)'; // Move horizontally across the screen
+      }, 5); // Add delay for effect
+
+      // After animation ends, remove both the banner and the monster
+      setTimeout(() => {
+          monsterImg.remove();    // Remove monster
+      }, 2500);  // Adjust timing to match the animation duration
+}
+
 
 
 // Function to handle cookie banners
@@ -18,7 +49,7 @@ function handleCookieBanner(buttons, preferences) {
     console.log('No button data found for domain:', domain);
     return;
   }
-
+  //injectMonster();
   const { marketing, performance } = preferences;
 
   let actionType = 'reject_all'; // Default to reject_all if no preference for domain
@@ -34,6 +65,7 @@ function handleCookieBanner(buttons, preferences) {
     if (buttonDetails.id) {
       button = document.getElementById(buttonDetails.id);
       if (button) {
+        
         console.log(`Clicking button by ID (${buttonDetails.id}):`, button);
         button.click();
         return true;
@@ -43,6 +75,7 @@ function handleCookieBanner(buttons, preferences) {
 
     // Try to find the button by Text
     if (buttonDetails.text) {
+      
       const xpath = `//*[contains(text(), "${buttonDetails.text}")]`; 
 
       button = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -56,6 +89,7 @@ function handleCookieBanner(buttons, preferences) {
 
     // Try to find the button by Class
     if (buttonDetails.class) {
+      
       const classXpath = `//*[${buttonDetails.class.split(' ').map(cls => `contains(@class, '${cls}')`).join(' and ')}]`;
       button = document.evaluate(classXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       if (button) {
