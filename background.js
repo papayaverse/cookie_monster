@@ -62,6 +62,7 @@ function collectCookiePreferences() {
 // Call the loadButtonData function and store the Promise
 const buttonDataPromise = loadButtonData();
 
+
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'getButtonData') {
@@ -126,6 +127,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
     }
     updateClickData(domain);
+  } else if (message.type === "detectGeminiNano") {
+    (async () => {
+      try {
+        const session = await chrome.aiOriginTrial.languageModel.create({
+          monitor(m) {
+            m.addEventListener("downloadprogress", (e) => {
+              console.log(`Downloaded ${e.loaded} of ${e.total} bytes.`);
+            });
+          },
+        });
+        console.log("Gemini Nano session created:", session);
+        sendResponse({ success: true, session });
+      } catch (error) {
+        console.error("Failed to create Gemini Nano session:", error);
+        sendResponse({ success: false, error: error.message });
+      }
+    })();
+    return true; // Indicate async response
   }
 });
 

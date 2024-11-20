@@ -1,3 +1,14 @@
+//load gemini nano
+
+chrome.runtime.sendMessage({ type: "detectGeminiNano" }, (response) => {
+  if (response.success) {
+    console.log("Gemini Nano session detected successfully:", response.session);
+  } else {
+    console.error("Error detecting Gemini Nano:", response.error);
+  }
+});
+
+
 // functions to change icon
 
 function updateIconToActive() {
