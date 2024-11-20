@@ -1,12 +1,21 @@
 //load gemini nano
 
-chrome.runtime.sendMessage({ type: "detectGeminiNano" }, (response) => {
-  if (response.success) {
-    console.log("Gemini Nano session detected successfully:", response.session);
-  } else {
-    console.error("Error detecting Gemini Nano:", response.error);
-  }
-});
+function makeGeminiNano(){
+  chrome.runtime.sendMessage({ type: "makeGeminiNano" }, (response) => {
+    if (response.success) {
+      console.log("Gemini Nano session detected successfully:");
+
+    } else {
+      console.error("Error detecting Gemini Nano:", response.error);
+    }
+  });
+}
+
+function promptGeminiNano(promptText){
+  chrome.runtime.sendMessage({ type: "usePrompt", prompt: promptText}, (response) => {
+    console.log("Prompt result:", response);
+  });
+}
 
 
 // functions to change icon
@@ -56,6 +65,8 @@ function injectMonster() {
 
 // Function to handle cookie banners
 function handleCookieBanner(buttons, preferences) {
+  makeGeminiNano();
+  promptGeminiNano("Hello, who are you?");
   if (!buttons) {
     console.log('No button data found for domain:', domain);
     return;

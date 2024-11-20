@@ -62,6 +62,8 @@ function collectCookiePreferences() {
 // Call the loadButtonData function and store the Promise
 const buttonDataPromise = loadButtonData();
 
+let session = null;
+
 
 // Listen for messages from content scripts
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -127,20 +129,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       });
     }
     updateClickData(domain);
-  } else if (message.type === "detectGeminiNano") {
+  } else if (message.type === "makeGeminiNano") {
+      if (session) {
+        console.log("Session already exists.");
+        sendResponse({ success: true });
+      } else {
+        (async () => {
+          try {
+            session = await ai.languageModel.create({
+              systemPrompt: "You are a friendly, helpful assistant specialized in clothing choices."
+            });
+            console.log("Gemini Nano session created:", session);
+            sendResponse({ success: true });
+          } catch (error) {
+            console.error("Failed to create Gemini Nano session:", error);
+            sendResponse({ success: false, error: error.message });
+          }
+        })();
+      }
+    return true; // Indicate async response
+  } else if (message.type === "usePrompt" && session) {
     (async () => {
       try {
-        const session = await chrome.aiOriginTrial.languageModel.create({
-          monitor(m) {
-            m.addEventListener("downloadprogress", (e) => {
-              console.log(`Downloaded ${e.loaded} of ${e.total} bytes.`);
-            });
-          },
-        });
-        console.log("Gemini Nano session created:", session);
-        sendResponse({ success: true, session });
+        const result = await session.prompt(message.prompt);
+        sendResponse({ success: true, result });
       } catch (error) {
-        console.error("Failed to create Gemini Nano session:", error);
+        console.error("Error using prompt:", error);
         sendResponse({ success: false, error: error.message });
       }
     })();
