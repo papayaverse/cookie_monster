@@ -136,8 +136,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         (async () => {
           try {
-            session = await ai.languageModel.create({
-              systemPrompt: "You are a friendly, helpful assistant specialized in clothing choices."
+            session = await chrome.aiOriginTrial.languageModel.create({
+              systemPrompt: "You are a friendly, helpful assistant specialized in detecting buttons corresponding to options such as 'accept_all', 'reject_all', 'manage_preferences', etc. in cookie consent banners."
             });
             console.log("Gemini Nano session created:", session);
             sendResponse({ success: true });
