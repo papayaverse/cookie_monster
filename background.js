@@ -49,7 +49,7 @@ function collectCookiePreferences() {
         allow_marketing: false,
         allow_performance: false
       };
-      
+
       chrome.storage.local.set({ marketing: defaultPreferences.allow_marketing, performance: defaultPreferences.allow_performance }, () => {
         console.log('Default preferences saved locally.');
         // Optionally, send these preferences to the backend
@@ -89,11 +89,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           },
           body: JSON.stringify(message.data)
         })
-        .then(response => response.json())
-        .then(data => {
-          console.log('Data sent to server:', data);
-        })
-        .catch(error => console.error('Error sending data to server:', error));
+          .then(response => response.json())
+          .then(data => {
+            console.log('Data sent to server:', data);
+          })
+          .catch(error => console.error('Error sending data to server:', error));
       } else {
         console.error('No credentials found for data collection');
       }
@@ -102,10 +102,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.action === 'updateIcon') {
     let iconPath = '';
     if (message.icon === 'active') {
-      
+
       iconPath = 'small_green_tick.png'; // Path to your active icon
     } else {
-      
+
       iconPath = 'cookie_monster_small.png'; // Path to your default icon
     }
     chrome.action.setIcon({ path: iconPath, tabId: sender.tab.id });
@@ -130,23 +130,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     updateClickData(domain);
   } else if (message.type === "makeGeminiNano") {
-      if (session) {
-        console.log("Session already exists.");
-        sendResponse({ success: true });
-      } else {
-        (async () => {
-          try {
-            session = await chrome.aiOriginTrial.languageModel.create({
-              systemPrompt: "You are a friendly, helpful assistant specialized in detecting buttons corresponding to options such as 'accept_all', 'reject_all', 'manage_preferences', etc. in cookie consent banners."
-            });
-            console.log("Gemini Nano session created:", session);
-            sendResponse({ success: true });
-          } catch (error) {
-            console.error("Failed to create Gemini Nano session:", error);
-            sendResponse({ success: false, error: error.message });
+    if (session) {
+      console.log("Session already exists.");
+      sendResponse({ success: true });
+    } else {
+      (async () => {
+        try {
+          let capabilities = await chrome.aiOriginTrial.languageModel.capabilities();
+          if (capabilities.available == 'readily') {
+            console.log("Gemini Nano capabilities are already availible.");
+          } else if (capabilities.available == 'after-download') {
+            console.log("Gemini Nano capabilities will be available after download.");
+          } else {
+            let err_msg = "Gemini Nano capabilities was" + capabilities.available;
+            console.log(err_msg);
+            sendResponse({ success: false, error: err_msg });
           }
-        })();
-      }
+        }
+        catch (error) {
+          console.error("Failed to get Gemini Nano capabilities:", error);
+          sendResponse({ success: false, error: error.message });
+        }
+      })();
+      (async () => {
+        try {
+          session = await chrome.aiOriginTrial.languageModel.create({
+            systemPrompt: "You are a friendly, helpful assistant specialized in detecting buttons corresponding to options such as 'accept_all', 'reject_all', 'manage_preferences', etc. in cookie consent banners."
+          });
+          console.log("Gemini Nano session created:", session);
+          sendResponse({ success: true });
+        } catch (error) {
+          console.error("Failed to create Gemini Nano session:", error);
+          sendResponse({ success: false, error: error.message });
+        }
+      })();
+    }
     return true; // Indicate async response
   } else if (message.type === "usePrompt" && session) {
     (async () => {
@@ -165,42 +183,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Save preferences to the backend
 function saveBackendCookiePreferences(cookiePreferences) {
   return new Promise((resolve, reject) => {
-      chrome.storage.local.get(['userIdentifier'], (data) => {
-          const userIdentifier = data.userIdentifier;
-          const identifierParam = userIdentifier ? userIdentifier : 'null';
-          const apiUrl = `https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/cookiePreferences?identifier=${encodeURIComponent(identifierParam)}`;
-          fetch(apiUrl, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(cookiePreferences)
-          })
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Failed to save preferences. Status: ' + response.status);
-              }
-              return response.json();
-          })
-          .then(data => {
-              console.log('Server response:', data);
-              if (data.id && !userIdentifier) {
-                  // Store the returned ID in local storage if it's not already stored
-                  chrome.storage.local.set({ userIdentifier: data.id }, () => {
-                      //alert(`Preferences saved successfully for ID: ${data.id}`);
-                      //alert('Cookie preferences saved successfully!');
-                      resolve();
-                  });
-              } else {
-                  //alert('Cookie preferences saved successfully for id ' + userIdentifier);
-                  resolve();
-              }
-          })
-          .catch(error => {
-              console.error('Error saving preferences:', error);
-              reject(error);
-          });
-      });
+    chrome.storage.local.get(['userIdentifier'], (data) => {
+      const userIdentifier = data.userIdentifier;
+      const identifierParam = userIdentifier ? userIdentifier : 'null';
+      const apiUrl = `https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/cookiePreferences?identifier=${encodeURIComponent(identifierParam)}`;
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cookiePreferences)
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to save preferences. Status: ' + response.status);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Server response:', data);
+          if (data.id && !userIdentifier) {
+            // Store the returned ID in local storage if it's not already stored
+            chrome.storage.local.set({ userIdentifier: data.id }, () => {
+              //alert(`Preferences saved successfully for ID: ${data.id}`);
+              //alert('Cookie preferences saved successfully!');
+              resolve();
+            });
+          } else {
+            //alert('Cookie preferences saved successfully for id ' + userIdentifier);
+            resolve();
+          }
+        })
+        .catch(error => {
+          console.error('Error saving preferences:', error);
+          reject(error);
+        });
+    });
   });
 }
 
