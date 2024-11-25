@@ -14,7 +14,7 @@ function makeGeminiNano(){
 
 function promptGeminiNano(promptText){
   chrome.runtime.sendMessage({ type: "usePrompt", prompt: promptText}, (response) => {
-    console.log("Prompt result:", response);
+    console.log("Prompt response:", response);
     console.log("Prompt result:", response.result);
   });
 }
