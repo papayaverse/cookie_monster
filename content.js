@@ -12,10 +12,29 @@ function makeGeminiNano(){
   });
 }
 
-function promptGeminiNano(promptText){
+/*function promptGeminiNano(promptText){
   chrome.runtime.sendMessage({ type: "usePrompt", prompt: promptText}, (response) => {
-    console.log("Prompt response:", response);
-    console.log("Prompt result:", response.result);
+    if (response.success) {
+      console.log("Prompt response:", response);
+      console.log("Prompt result:", response.result);
+      return response.result;
+    } else {
+      console.error("Error using prompt:", response.error);
+    }
+  });
+}*/
+
+function promptGeminiNano(promptText) {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage({ type: "usePrompt", prompt: promptText }, (response) => {
+      if (response && response.success) {
+        console.log("Prompt response received:", response.result);
+        resolve(response.result); // Resolve with the result
+      } else {
+        console.error("Error using prompt:", response?.error || "Unknown error");
+        reject(new Error(response?.error || "Failed to get a valid response"));
+      }
+    });
   });
 }
 
@@ -63,15 +82,191 @@ function injectMonster() {
       }, 2500);  // Adjust timing to match the animation duration
 }
 
+function getExternalBanner() {
+  /**
+   * This function scans the webpage DOM for potential cookie banners
+   * based on certain keywords in classes, IDs, or aria-labels.
+   */
+  const keywords = [
+    'cookie', 'cc-banner', 'tarteaucitron', 'iubenda', 'osano', 'consent', 
+    'gdpr', 'onetrust', 'wp-notification', 'privacy'
+  ];
+
+  const divs = document.querySelectorAll('div'); // Get all <div> elements in the DOM
+  let topmostDiv = null;
+
+  divs.forEach(div => {
+    const classes = Array.from(div.classList || []); // Get the class list as an array
+    const id = div.id || ''; // Get the id of the element
+    const ariaLabel = div.getAttribute('aria-label') || ''; // Get the aria-label attribute
+
+    // Combine classes, id, and aria-label for keyword matching
+    const attributesToCheck = [...classes, id, ariaLabel];
+
+    // Check if any of the attributes contain the keywords
+    const matchesKeyword = attributesToCheck.some(attr => 
+      keywords.some(keyword => attr.toLowerCase().includes(keyword))
+    );
+
+    if (matchesKeyword) {
+      console.log('Found a div with cookie banner:', div);
+
+      // Check if this div is the topmost one based on length and parent depth
+      if (
+        div.innerHTML.length > 50 && // Ensure the div has some content
+        (topmostDiv === null || div.compareDocumentPosition(topmostDiv) & Node.DOCUMENT_POSITION_CONTAINED_BY)
+      ) {
+        console.log('Accepted cookie banner div');
+        topmostDiv = div;
+      }
+    }
+  });
+
+  if (topmostDiv) {
+    console.log('Topmost cookie banner div found:', topmostDiv);
+  } else {
+    console.log('No cookie banner div found.');
+  }
+
+  return topmostDiv;
+}
+
+function takeOutText(htmlContent) {
+  /**
+   * This function takes in an HTML string and removes all text nodes
+   * from specific tags (`p`, `img`, `div`, `th`, `tr`, `td`) while preserving
+   * nested `a` and `button` elements.
+   */
+
+  // Create a DOM parser to convert the HTML string into a document object
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
+
+  // Define the tags to process
+  const tagsToProcess = ['p', 'img', 'div', 'th', 'tr', 'td'];
+
+  // Iterate over each specified tag
+  tagsToProcess.forEach((tagName) => {
+    const elements = doc.querySelectorAll(tagName);
+
+    elements.forEach((element) => {
+      // Find nested <a> and <button> tags
+      const nestedLinks = element.querySelectorAll('a');
+      const nestedButtons = element.querySelectorAll('button');
+
+      // If nested <a> or <button> tags are found, move them outside the element
+      nestedLinks.forEach((nestedLink) => {
+        element.parentNode.insertBefore(nestedLink, element);
+      });
+
+      nestedButtons.forEach((nestedButton) => {
+        element.parentNode.insertBefore(nestedButton, element);
+      });
+
+      // Remove the element if it only contains text or is empty
+      if (!element.hasChildNodes() || Array.from(element.childNodes).every((child) => child.nodeType === Node.TEXT_NODE)) {
+        element.remove();
+      }
+    });
+  });
+
+  // Serialize the modified DOM back into an HTML string
+  return doc.documentElement.outerHTML;
+}
+
+function makeGeminiPrompt(cleanedBanner) {
+
+  // Define the descriptions for each button type
+  const buttonToPrompt = {
+    'manage_my_preferences': 'open up a modal or display that allows the user to set more granular preferences and cookie settings',
+    'reject_all': 'reject all cookies or accept only necessary/essential cookies on the site, and opt-out of tracking and data sharing',
+    'accept_all': 'accept or allow all cookies and consent to tracking on the website',
+  };
+
+  // Construct the prompt
+  let prompt = `Here is a cookie banner on a website:\n${cleanedBanner}\nWhich HTML element corresponds to the following types:\n`;
+  for (const [buttonType, description] of Object.entries(buttonToPrompt)) {
+    prompt += `${buttonType}: allows the user to ${description}\n`;
+  }
+  prompt += "If there is no element that seems to correspond to the type (accept_all, reject_all, manage_my_preferences), please leave it out.\n";
+  prompt += "Please return the output in JSON format with the following keys: 'text', 'id', 'class'.\n";
+  prompt += "For example:\n";
+  prompt += `{
+    'accept_all': {'text': 'Accept all cookies', 'id': 'onetrust-accept-btn-handler', 'class': 'None'},
+    'reject_all': {'text': 'Necessary cookies only', 'id': 'onetrust-reject-all-handler', 'class': 'None'},
+    'manage_my_preferences': {'text': 'Customize settings', 'id': 'onetrust-pc-btn-handler', 'class': 'None'}
+  }`;
+  prompt += "\n Double check your work. Millions of people will perish if you mistakes."
+
+  return prompt;
+
+}
+
+// extract json 
+function extractJsonContent(inputString) {
+  const match = inputString.match(/```json([\s\S]*?)```/);
+  if (match && match[1]) {
+    return match[1].trim(); // Trim to remove leading/trailing whitespace
+  }
+  return null; // Return null if no match is found
+}
+
+
+// Parse gemini response
+function parseGeminiNanoResponse(responseString) {
+  try {
+
+    newResponseString = extractJsonContent(responseString);
+
+    // Replace single quotes with double quotes to make it valid JSON
+    const normalizedString = newResponseString
+      .replace(/'/g, '"') // Replace all single quotes with double quotes
+
+    // Parse the normalized string into a JSON object
+    const parsedResponse = JSON.parse(normalizedString);
+
+    console.log("Parsed response as JSON:", parsedResponse);
+    return parsedResponse;
+  } catch (error) {
+    console.error("Failed to parse Gemini Nano response:", error);
+    return null;
+  }
+}
+
+
+
+
+// Function to use Gemini Nano to detect cookie banners
+function useGeminiDetection() {
+  // Get the external cookie banner div
+  const cookieBanner = getExternalBanner();
+  if (cookieBanner) {
+    cleanedBanner = takeOutText(cookieBanner.innerHTML);
+    promptToGemini = makeGeminiPrompt(cleanedBanner);
+    console.log('Cookie banner detected, prompt is here :', promptToGemini);
+    promptGeminiNano(promptToGemini)
+    .then((promptResult) => {
+      console.log("Prompt result:", promptResult);
+      const parsedResponse = parseGeminiNanoResponse(promptResult);
+      if (parsedResponse) {
+        console.log("Parsed response:", parsedResponse);
+        return parsedResponse;
+      }
+    });
+    //console.log('Prompt result:', promptResult);
+  }
+  else {
+    console.log('No cookie banner detected.');
+  }
+
+}
 
 
 // Function to handle cookie banners
 function handleCookieBanner(buttons, preferences) {
-  makeGeminiNano();
-  promptGeminiNano("Hello, who are you?");
   if (!buttons) {
     console.log('No button data found for domain:', domain);
-    return;
+    buttons = useGeminiDetection();
   }
   //injectMonster();
   const { marketing, performance } = preferences;
