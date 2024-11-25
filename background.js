@@ -132,7 +132,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === "makeGeminiNano") {
       if (session) {
         console.log("Session already exists.");
-        sendResponse({ success: true });
+        sendResponse({ success: true , message: "Session already exists."});
       } else {
         (async () => {
           try {
@@ -140,10 +140,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               systemPrompt: "You are a friendly, helpful assistant specialized in detecting buttons corresponding to options such as 'accept_all', 'reject_all', 'manage_preferences', etc. in cookie consent banners."
             });
             console.log("Gemini Nano session created:", session);
-            sendResponse({ success: true });
+            sendResponse({ success: true , message: "Gemini Nano session created."});
           } catch (error) {
             console.error("Failed to create Gemini Nano session:", error);
-            sendResponse({ success: false, error: error.message });
+            sendResponse({ success: false, message: "error", error: error.message });
           }
         })();
       }

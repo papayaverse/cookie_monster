@@ -3,6 +3,7 @@
 function makeGeminiNano(){
   chrome.runtime.sendMessage({ type: "makeGeminiNano" }, (response) => {
     if (response.success) {
+      console.log(response.message);
       console.log("Gemini Nano session detected successfully:");
 
     } else {
@@ -14,6 +15,7 @@ function makeGeminiNano(){
 function promptGeminiNano(promptText){
   chrome.runtime.sendMessage({ type: "usePrompt", prompt: promptText}, (response) => {
     console.log("Prompt result:", response);
+    console.log("Prompt result:", response.result);
   });
 }
 
