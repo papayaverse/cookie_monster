@@ -62,7 +62,24 @@ function collectCookiePreferences() {
 // Call the loadButtonData function and store the Promise
 const buttonDataPromise = loadButtonData();
 
-let session = null;
+let sessionPromise = null;
+
+// Function to get or create a Gemini Nano session
+function getGeminiNanoSession() {
+  if (!sessionPromise) {
+    sessionPromise = chrome.aiOriginTrial.languageModel.create({
+      systemPrompt: "You are a friendly, helpful assistant specialized in detecting buttons corresponding to options such as 'accept_all', 'reject_all', 'manage_preferences', etc. in cookie consent banners.",
+    }).then((newSession) => {
+      console.log("Gemini Nano session created:", newSession);
+      return newSession;
+    }).catch((error) => {
+      console.error("Failed to create Gemini Nano session:", error);
+      sessionPromise = null; // Reset so it can retry later
+      throw error;
+    });
+  }
+  return sessionPromise;
+}
 
 
 // Listen for messages from content scripts
@@ -130,35 +147,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     updateClickData(domain);
   } else if (message.type === "makeGeminiNano") {
-      if (session) {
-        console.log("Session already exists.");
-        sendResponse({ success: true , message: "Session already exists."});
-      } else {
-        (async () => {
-          try {
-            session = await chrome.aiOriginTrial.languageModel.create({
-              systemPrompt: "You are a friendly, helpful assistant specialized in detecting buttons corresponding to options such as 'accept_all', 'reject_all', 'manage_preferences', etc. in cookie consent banners."
-            });
-            console.log("Gemini Nano session created:", session);
-            sendResponse({ success: true , message: "Gemini Nano session created."});
-          } catch (error) {
-            console.error("Failed to create Gemini Nano session:", error);
-            sendResponse({ success: false, message: "error", error: error.message });
-          }
-        })();
-      }
-    return true; // Indicate async response
-  } else if (message.type === "usePrompt" && session) {
-    (async () => {
-      try {
-        const result = await session.prompt(message.prompt);
-        sendResponse({ success: true, result });
-      } catch (error) {
-        console.error("Error using prompt:", error);
-        sendResponse({ success: false, error: error.message });
-      }
-    })();
-    return true; // Indicate async response
+    getGeminiNanoSession()
+    .then(() => sendResponse({ success: true, message: "Gemini Nano session is ready." }))
+    .catch((error) => sendResponse({ success: false, error: error.message }));
+  return true; // Respond asynchronously
+  } else if (message.type === "usePrompt") {
+    getGeminiNanoSession()
+      .then((session) => session.prompt(message.prompt))
+      .then((result) => sendResponse({ success: true, result }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true; // Respond asynchronously
   }
 });
 
