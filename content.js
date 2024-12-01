@@ -264,11 +264,12 @@ function useGeminiDetection() {
 
 // Function to handle cookie banners
 function handleCookieBanner(buttons, preferences) {
+  gemini_response = useGeminiDetection();
   if (!buttons) {
-    console.log('No button data found for domain:', domain);
-    buttons = { external_buttons: useGeminiDetection() };
+    console.log('Using gemini for:', domain);
+    buttons = { external_buttons: gemini_response };
   } else {
-    console.log('Button data found for domain:', domain);
+    console.log('Using precomputed data for:', domain);
   }
   //injectMonster();
   const { marketing, performance } = preferences;
