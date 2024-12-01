@@ -1,6 +1,8 @@
-# Cookie Monster Version 1
+# Cookie Monster Version 4
 
-The first version of this project will only be able to peform the following operations in order of priority:
+The fourth version of this project will be able to execute user preferences across websites not only in our dataset but also on websites not in the dataset using Google's Gemini Nano.
+
+Here are some of the things it can do:
 
 1. Reject All on External Banner
 2. Manage Preferences on External Banner, Reject All on Internal Banner

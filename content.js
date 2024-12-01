@@ -108,7 +108,13 @@ function getExternalBanner() {
       keywords.some(keyword => attr.toLowerCase().includes(keyword))
     );
 
-    if (matchesKeyword) {
+    const textOfBanner = div.innerHTML
+    const cookieCount = (textOfBanner.match(/cookie/gi) || []).length;
+    //const matchesText = (cookieCount > 2);
+    const matchesText = false;
+    
+
+    if (matchesKeyword || matchesText) {
       console.log('Found a div with cookie banner:', div);
 
       // Check if this div is the topmost one based on length and parent depth
@@ -131,48 +137,57 @@ function getExternalBanner() {
   return topmostDiv;
 }
 
-function takeOutText(htmlContent) {
+function takeOutText(htmlElement) {
   /**
-   * This function takes in an HTML string and removes all text nodes
-   * from specific tags (`p`, `img`, `div`, `th`, `tr`, `td`) while preserving
-   * nested `a` and `button` elements.
+   * Cleans the input HTML element by:
+   * - Removing non-functional content (e.g., plain text and SVGs).
+   * - Preserving functional elements like `<button>` and `<a>`.
    */
+  
+  // Create a deep clone of the element to avoid modifying the original DOM
+  const clonedElement = htmlElement.cloneNode(true);
 
-  // Create a DOM parser to convert the HTML string into a document object
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlContent, 'text/html');
+  // Define the tags to preserve and the tags to process
+  const tagsToPreserve = ['button', 'a'];
+  const tagsToRemoveText = ['div', 'p', 'span', 'th', 'tr', 'td'];
+  const tagsToRemoveEntirely = ['svg'];
 
-  // Define the tags to process
-  const tagsToProcess = ['p', 'img', 'div', 'th', 'tr', 'td'];
+  // Remove entire elements like <svg>
+  tagsToRemoveEntirely.forEach((tag) => {
+    const elements = clonedElement.querySelectorAll(tag);
+    elements.forEach((element) => element.remove());
+  });
 
-  // Iterate over each specified tag
-  tagsToProcess.forEach((tagName) => {
-    const elements = doc.querySelectorAll(tagName);
+  // Iterate through the tags that need processing
+  tagsToRemoveText.forEach((tag) => {
+    const elements = clonedElement.querySelectorAll(tag);
 
     elements.forEach((element) => {
-      // Find nested <a> and <button> tags
-      const nestedLinks = element.querySelectorAll('a');
-      const nestedButtons = element.querySelectorAll('button');
+      // Find nested functional elements (like buttons and links)
+      const nestedFunctionalElements = element.querySelectorAll(tagsToPreserve.join(','));
 
-      // If nested <a> or <button> tags are found, move them outside the element
-      nestedLinks.forEach((nestedLink) => {
-        element.parentNode.insertBefore(nestedLink, element);
+      nestedFunctionalElements.forEach((nestedElement) => {
+        // Move preserved elements outside their parent
+        console.log('Preserving and moving nested functional element:', nestedElement);
+        element.parentNode.insertBefore(nestedElement, element);
       });
 
-      nestedButtons.forEach((nestedButton) => {
-        element.parentNode.insertBefore(nestedButton, element);
-      });
-
-      // Remove the element if it only contains text or is empty
-      if (!element.hasChildNodes() || Array.from(element.childNodes).every((child) => child.nodeType === Node.TEXT_NODE)) {
-        element.remove();
-      }
+      // Remove the text inside the element
+      element.textContent = ''; // Remove any text nodes within the element
     });
   });
 
-  // Serialize the modified DOM back into an HTML string
-  return doc.documentElement.outerHTML;
+  // Remove all irrelevant text nodes directly under the root element
+  Array.from(clonedElement.childNodes).forEach((node) => {
+    if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '') {
+      node.remove(); // Remove stray text nodes
+    }
+  });
+
+  // Return the cleaned HTML as a string
+  return clonedElement.innerHTML;
 }
+
 
 function makeGeminiPrompt(cleanedBanner) {
 
@@ -196,7 +211,7 @@ function makeGeminiPrompt(cleanedBanner) {
     'reject_all': {'text': 'Necessary cookies only', 'id': 'onetrust-reject-all-handler', 'class': 'None'},
     'manage_my_preferences': {'text': 'Customize settings', 'id': 'onetrust-pc-btn-handler', 'class': 'None'}
   }`;
-  prompt += "\n Double check your work. Millions of people will perish if you mistakes."
+  prompt += "\n Make sure to only report buttons in the given HTML code, and to return the full id and CSS classes, while only returning the text within the HTML element. \n Double check your work. Millions of people will perish if you mistakes."
 
   return prompt;
 
@@ -236,38 +251,41 @@ function parseGeminiNanoResponse(responseString) {
 
 
 
-// Function to use Gemini Nano to detect cookie banners
 function useGeminiDetection() {
-  // Get the external cookie banner div
-  const cookieBanner = getExternalBanner();
-  if (cookieBanner) {
-    cleanedBanner = takeOutText(cookieBanner.innerHTML);
-    promptToGemini = makeGeminiPrompt(cleanedBanner);
-    console.log('Cookie banner detected, prompt is here :', promptToGemini);
-    promptGeminiNano(promptToGemini)
-    .then((promptResult) => {
-      console.log("Prompt result:", promptResult);
-      const parsedResponse = parseGeminiNanoResponse(promptResult);
-      if (parsedResponse) {
-        console.log("Parsed response:", parsedResponse);
-        return parsedResponse;
-      }
-    });
-    //console.log('Prompt result:', promptResult);
-  }
-  else {
-    console.log('No cookie banner detected.');
-  }
+  return new Promise((resolve, reject) => {
+    const cookieBanner = getExternalBanner();
+    if (cookieBanner) {
+      const cleanedBanner = takeOutText(cookieBanner);
+      console.log('Cleaned Banner here: ', cleanedBanner)
+      const promptToGemini = makeGeminiPrompt(cleanedBanner);
+      console.log('Cookie banner detected, prompt is here:', promptToGemini);
 
+      promptGeminiNano(promptToGemini)
+        .then((promptResult) => {
+          console.log("Prompt result:", promptResult);
+          const parsedResponse = parseGeminiNanoResponse(promptResult);
+          if (parsedResponse) {
+            console.log("Parsed response:", parsedResponse);
+            resolve(parsedResponse); // Resolve with the parsed buttons
+          } else {
+            reject(new Error("Failed to parse Gemini Nano response"));
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to process prompt with Gemini Nano:", error);
+          reject(error);
+        });
+    } else {
+      console.log('No cookie banner detected.');
+      reject(new Error("No cookie banner detected"));
+    }
+  });
 }
+
 
 
 // Function to handle cookie banners
 function handleCookieBanner(buttons, preferences) {
-  if (!buttons) {
-    console.log('No button data found for domain:', domain);
-    buttons = useGeminiDetection();
-  }
   //injectMonster();
   const { marketing, performance } = preferences;
 
@@ -276,21 +294,27 @@ function handleCookieBanner(buttons, preferences) {
     actionType = 'accept_all';
   }
 
+  if (!buttons) {
+    console.log('Using gemini for:', domain);
+    setTimeout(() => {
+      useGeminiDetection().then((fetchedButtons) => {
+        if (fetchedButtons) {
+          console.log('Fetched buttons:', fetchedButtons);
+          let newButtons = {'external_buttons' : fetchedButtons};
+          clickBanner(newButtons);
+        } else {
+          console.log("something went wrong with fetchedButtons")
+        }
+      });
+    }, "2000");
+  } else {
+    console.log('Using precomputed data for:', domain);
+    clickBanner(buttons);
+  }
+
   // Helper function to find and click a button
   function findAndClickButton(buttonDetails) {
     let button;
-
-    // Try to find the button by ID
-    if (buttonDetails.id) {
-      button = document.getElementById(buttonDetails.id);
-      if (button) {
-        
-        console.log(`Clicking button by ID (${buttonDetails.id}):`, button);
-        button.click();
-        return true;
-      }
-      console.log(`Button not found by ID: ${buttonDetails.id}`);
-    }
 
     // Try to find the button by Text
     if (buttonDetails.text) {
@@ -300,10 +324,32 @@ function handleCookieBanner(buttons, preferences) {
       button = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       if (button) {
         console.log(`Clicking button by Text (${buttonDetails.text}):`, button);
-        button.click();
-        return true;
+        try {
+          button.click();
+          return true;
+        }
+        catch (error) {
+          console.error(error);
+        }
       }
       console.log(`Button not found by Text: ${buttonDetails.text}`);
+    }
+
+    // Try to find the button by ID
+    if (buttonDetails.id) {
+      button = document.getElementById(buttonDetails.id);
+      if (button) {
+        
+        console.log(`Clicking button by ID (${buttonDetails.id}):`, button);
+        try {
+          button.click();
+          return true;
+        }
+        catch (error) {
+          console.error(error);
+        }
+      }
+      console.log(`Button not found by ID: ${buttonDetails.id}`);
     }
 
     // Try to find the button by Class
@@ -313,8 +359,13 @@ function handleCookieBanner(buttons, preferences) {
       button = document.evaluate(classXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       if (button) {
         console.log(`Clicking button by Class (${buttonDetails.class}):`, button);
-        button.click();
-        return true;
+        try {
+          button.click();
+          return true;
+        }
+        catch (error) {
+          console.error(error);
+        }
       }
       console.log(`Button not found by Class: ${buttonDetails.class}`);
     }
@@ -324,7 +375,7 @@ function handleCookieBanner(buttons, preferences) {
   }
 
   // Function to handle accept all path
-  function handleAcceptAll() {
+  function handleAcceptAll(buttons) {
     if (buttons.external_buttons && buttons.external_buttons.accept_all) {
       const acceptAllClicked = findAndClickButton(buttons.external_buttons.accept_all);
       if (acceptAllClicked) return;
@@ -357,7 +408,7 @@ function handleCookieBanner(buttons, preferences) {
   }
 
   // Function to handle reject all path
-  function handleRejectAll() {
+  function handleRejectAll(buttons) {
     if (buttons.external_buttons && buttons.external_buttons.reject_all) {
       const rejectAllClicked = findAndClickButton(buttons.external_buttons.reject_all);
       if (rejectAllClicked) return;
@@ -388,19 +439,21 @@ function handleCookieBanner(buttons, preferences) {
       }
     }
   }
-  setTimeout(() => {
+  function clickBanner(buttons){
     updateIconToActive();
     // Notify background script that a banner was clicked
     chrome.runtime.sendMessage({ action: 'bannerClicked' });
     if (actionType === 'accept_all') {
-      handleAcceptAll();
+      handleAcceptAll(buttons);
     } else {
-      handleRejectAll();
+      handleRejectAll(buttons);
     }
     setTimeout(() => {
       updateIconToDefault(); // Revert back to the default icon after a short delay
-    }, 3000);
-  }, 2000); // Adjust delay as needed for your pages
+    }, 3000);  // Adjust delay as needed for your pages
+  }
+
+
 
 
 }
