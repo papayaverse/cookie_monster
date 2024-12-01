@@ -1,6 +1,6 @@
 //load gemini nano
 
-function makeGeminiNano(){
+function makeGeminiNano() {
   chrome.runtime.sendMessage({ type: "makeGeminiNano" }, (response) => {
     if (response.success) {
       console.log(response.message);
@@ -53,33 +53,33 @@ function updateIconToDefault() {
 
 // Function to inject the monster (PNG) into the DOM
 function injectMonster() {
-      // Create an image element for the monster (PNG)
-      console.log("Injecting monster");
-      const monsterImg = document.createElement('img');
-      // Use a relative path to the PNG within your extension
-      monsterImg.src = chrome.runtime.getURL('cookie_monster_logo_nobg.png'); // Path to your PNG file
-      // Set styles for the monster image
-      monsterImg.style.position = 'fixed';
-      monsterImg.style.zIndex = '10000000000'; // Ensure it's on top of other elements
-      monsterImg.style.height = '200px';  // Adjust height as needed
-      monsterImg.style.width = '200px';   // Adjust width as needed
-      monsterImg.style.top = '50%';        // Center the monster vertically
-      monsterImg.style.left = '0px';    // Start the monster off-screen on the left
-      monsterImg.style.transform = 'translateY(-50%)';  // Vertically center the monster
+  // Create an image element for the monster (PNG)
+  console.log("Injecting monster");
+  const monsterImg = document.createElement('img');
+  // Use a relative path to the PNG within your extension
+  monsterImg.src = chrome.runtime.getURL('cookie_monster_logo_nobg.png'); // Path to your PNG file
+  // Set styles for the monster image
+  monsterImg.style.position = 'fixed';
+  monsterImg.style.zIndex = '10000000000'; // Ensure it's on top of other elements
+  monsterImg.style.height = '200px';  // Adjust height as needed
+  monsterImg.style.width = '200px';   // Adjust width as needed
+  monsterImg.style.top = '50%';        // Center the monster vertically
+  monsterImg.style.left = '0px';    // Start the monster off-screen on the left
+  monsterImg.style.transform = 'translateY(-50%)';  // Vertically center the monster
 
-      // Inject the monster (PNG) into the DOM
-      document.body.appendChild(monsterImg);
+  // Inject the monster (PNG) into the DOM
+  document.body.appendChild(monsterImg);
 
-      // Animate the monster to move towards the cookie banner's position
-      setTimeout(() => {
-        monsterImg.style.transition = 'transform 4s linear';  // Set up the transition
-        monsterImg.style.transform = 'translate(100vw, -50%)'; // Move horizontally across the screen
-      }, 5); // Add delay for effect
+  // Animate the monster to move towards the cookie banner's position
+  setTimeout(() => {
+    monsterImg.style.transition = 'transform 4s linear';  // Set up the transition
+    monsterImg.style.transform = 'translate(100vw, -50%)'; // Move horizontally across the screen
+  }, 5); // Add delay for effect
 
-      // After animation ends, remove both the banner and the monster
-      setTimeout(() => {
-          monsterImg.remove();    // Remove monster
-      }, 2500);  // Adjust timing to match the animation duration
+  // After animation ends, remove both the banner and the monster
+  setTimeout(() => {
+    monsterImg.remove();    // Remove monster
+  }, 2500);  // Adjust timing to match the animation duration
 }
 
 function getExternalBanner() {
@@ -88,7 +88,7 @@ function getExternalBanner() {
    * based on certain keywords in classes, IDs, or aria-labels.
    */
   const keywords = [
-    'cookie', 'cc-banner', 'tarteaucitron', 'iubenda', 'osano', 'consent', 
+    'cookie', 'cc-banner', 'tarteaucitron', 'iubenda', 'osano', 'consent',
     'gdpr', 'onetrust', 'wp-notification', 'privacy'
   ];
 
@@ -104,7 +104,7 @@ function getExternalBanner() {
     const attributesToCheck = [...classes, id, ariaLabel];
 
     // Check if any of the attributes contain the keywords
-    const matchesKeyword = attributesToCheck.some(attr => 
+    const matchesKeyword = attributesToCheck.some(attr =>
       keywords.some(keyword => attr.toLowerCase().includes(keyword))
     );
 
@@ -245,14 +245,14 @@ function useGeminiDetection() {
     promptToGemini = makeGeminiPrompt(cleanedBanner);
     console.log('Cookie banner detected, prompt is here :', promptToGemini);
     promptGeminiNano(promptToGemini)
-    .then((promptResult) => {
-      console.log("Prompt result:", promptResult);
-      const parsedResponse = parseGeminiNanoResponse(promptResult);
-      if (parsedResponse) {
-        console.log("Parsed response:", parsedResponse);
-        return parsedResponse;
-      }
-    });
+      .then((promptResult) => {
+        console.log("Prompt result:", promptResult);
+        const parsedResponse = parseGeminiNanoResponse(promptResult);
+        if (parsedResponse) {
+          console.log("Parsed response:", parsedResponse);
+          return parsedResponse;
+        }
+      });
     //console.log('Prompt result:', promptResult);
   }
   else {
@@ -266,7 +266,9 @@ function useGeminiDetection() {
 function handleCookieBanner(buttons, preferences) {
   if (!buttons) {
     console.log('No button data found for domain:', domain);
-    buttons = useGeminiDetection();
+    buttons = { external_buttons: useGeminiDetection() };
+  } else {
+    console.log('Button data found for domain:', domain);
   }
   //injectMonster();
   const { marketing, performance } = preferences;
@@ -284,7 +286,7 @@ function handleCookieBanner(buttons, preferences) {
     if (buttonDetails.id) {
       button = document.getElementById(buttonDetails.id);
       if (button) {
-        
+
         console.log(`Clicking button by ID (${buttonDetails.id}):`, button);
         button.click();
         return true;
@@ -294,8 +296,8 @@ function handleCookieBanner(buttons, preferences) {
 
     // Try to find the button by Text
     if (buttonDetails.text) {
-      
-      const xpath = `//*[contains(text(), "${buttonDetails.text}")]`; 
+
+      const xpath = `//*[contains(text(), "${buttonDetails.text}")]`;
 
       button = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       if (button) {
@@ -308,7 +310,7 @@ function handleCookieBanner(buttons, preferences) {
 
     // Try to find the button by Class
     if (buttonDetails.class) {
-      
+
       const classXpath = `//*[${buttonDetails.class.split(' ').map(cls => `contains(@class, '${cls}')`).join(' and ')}]`;
       button = document.evaluate(classXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
       if (button) {
@@ -339,7 +341,7 @@ function handleCookieBanner(buttons, preferences) {
             buttons.internal_buttons.forEach(button => {
               if (button.option_name === 'accept_all') {
                 const acceptAllClicked = findAndClickButton(button);
-                  // Click confirm my preferences after accept all
+                // Click confirm my preferences after accept all
                 setTimeout(() => {
                   buttons.internal_buttons.forEach(button => {
                     if (button.option_name === 'confirm_my_preferences') {
@@ -350,7 +352,8 @@ function handleCookieBanner(buttons, preferences) {
               }
             });
           }
-        }, 2000); // Adjust delay as needed for your pages
+        }, 
+      ); // Adjust delay as needed for your pages
         return;
       }
     }
@@ -371,7 +374,7 @@ function handleCookieBanner(buttons, preferences) {
           if (buttons.internal_buttons) {
             buttons.internal_buttons.forEach(button => {
               if (button.option_name === 'reject_all') {
-              const rejectAllClicked = findAndClickButton(button);
+                const rejectAllClicked = findAndClickButton(button);
                 // Click confirm my preferences after reject all
                 setTimeout(() => {
                   buttons.internal_buttons.forEach(button => {
@@ -408,7 +411,7 @@ function handleCookieBanner(buttons, preferences) {
 function getBaseDomain(url) {
   const hostname = url.hostname;
   const domainParts = hostname.split('.');
-  
+
   // Known common TLDs that consist of multiple parts
   const knownTLDs = [
     'co.uk', 'org.uk', 'gov.uk', 'ac.uk',
