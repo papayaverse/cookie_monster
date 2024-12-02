@@ -142,7 +142,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 //Save Data to the backend
-function saveBackendData(data){
+function saveBackendData(dataBrowsing){
   return new Promise((resolve, reject) => {
     chrome.storage.local.get(['userIdentifier'], (data) => {
         const userIdentifier = data.userIdentifier;
@@ -153,7 +153,7 @@ function saveBackendData(data){
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(dataBrowsing)
         })
         .then(response => {
             if (!response.ok) {
@@ -174,7 +174,7 @@ function saveBackendData(data){
             }
         })
         .catch(error => {
-            console.error('Error saving data:', error);
+            console.error('Error saving data:', error, ' with data ', dataBrowsing);
             reject(error);
         });
     });
