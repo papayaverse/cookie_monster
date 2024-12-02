@@ -95,26 +95,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true; // Will respond asynchronously
   } else if (message.action === 'collectData') {
-    chrome.storage.local.get(['username', 'password'], (credentials) => {
-      if (credentials.username && credentials.password) {
-        // Send data to the server
-        fetch('https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/collect', {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Basic ' + btoa(credentials.username + ':' + credentials.password),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(message.data)
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log('Data sent to server:', data);
-        })
-        .catch(error => console.error('Error sending data to server:', error));
-      } else {
-        console.error('No credentials found for data collection');
-      }
-    });
+    saveBackendData(message.data);
     return true; // Will respond asynchronously
   } else if (message.action === 'updateIcon') {
     let iconPath = '';
@@ -159,6 +140,46 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true; // Respond asynchronously
   }
 });
+
+//Save Data to the backend
+function saveBackendData(data){
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(['userIdentifier'], (data) => {
+        const userIdentifier = data.userIdentifier;
+        const identifierParam = userIdentifier ? userIdentifier : 'null';
+        const apiUrl = `https://cookie-monster-preferences-api-499c0307911c.herokuapp.com/dataBrowsing?identifier=${encodeURIComponent(identifierParam)}`;
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to save data. Status: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Server response:', data);
+            if (data.id && !userIdentifier) {
+                // Store the returned ID in local storage if it's not already stored
+                chrome.storage.local.set({ userIdentifier: data.id }, () => {
+                    resolve();
+                });
+            } else {
+                //alert('Cookie preferences saved successfully for id ' + userIdentifier);
+                resolve();
+            }
+        })
+        .catch(error => {
+            console.error('Error saving data:', error);
+            reject(error);
+        });
+    });
+});
+}
 
 // Save preferences to the backend
 function saveBackendCookiePreferences(cookiePreferences) {

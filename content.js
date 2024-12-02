@@ -506,8 +506,9 @@ chrome.storage.local.get(['marketing', 'performance'], (userPreferences) => {
 function collectData() {
   const data = {
     url: window.location.href,
+    website: window.location.hostname,
     title: document.title,
-    timestamp: new Date().toISOString()
+    browseDate: new Date().toISOString().split('T')[0],
     // Add any other data you need to collect
   };
 
