@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Papaya CookieMonster",
-  "version": "4.1.6",
+  "version": "4.1.7",
   "permissions": ["storage", "aiLanguageModelOriginTrial"],
-  "trial_tokens": ["ApyX55felqXlbzTH6ZOjYY5GW+MTedYdw7yuLxzB4h1aSoYwWi0EcfPolaXj2URs/trNcd8Thpwb7wPG+O4NJQ0AAAB4eyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8vYWRrb2doZ2dtbGdvaWlsa2lwbGhtZWFtY2hibmpnZWsiLCJmZWF0dXJlIjoiQUlQcm9tcHRBUElGb3JFeHRlbnNpb24iLCJleHBpcnkiOjE3NjA0ODYzOTl9"],
+  "trial_tokens": ["AingviqqcXCeGSLjtwcm8qHPE8recHydubv/lnN+PudIRyJw3vZTPyRYn3qfdAj5dyUOUvkZVp7YOV/ZnQp9iQoAAAB4eyJvcmlnaW4iOiJjaHJvbWUtZXh0ZW5zaW9uOi8vbGFhbGZqY2dkZ2FtbGhmZGFnamJjcGRkbmplb2ptaGEiLCJmZWF0dXJlIjoiQUlQcm9tcHRBUElGb3JFeHRlbnNpb24iLCJleHBpcnkiOjE3NjA0ODYzOTl9"],
   "host_permissions": [
     "http://*/*",
     "https://*/*"
