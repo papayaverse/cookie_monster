@@ -82,17 +82,20 @@ function injectMonster() {
       }, 2500);  // Adjust timing to match the animation duration
 }
 
-function getExternalBanner() {
+function getExternalBanner(doc) {
   /**
    * This function scans the webpage DOM for potential cookie banners
    * based on certain keywords in classes, IDs, or aria-labels.
    */
   const keywords = [
     'cookie', 'cc-banner', 'tarteaucitron', 'iubenda', 'osano', 'consent', 
-    'gdpr', 'onetrust', 'wp-notification', 'privacy'
+    'gdpr', 'onetrust', 'wp-notification', 'privacy', 'notice', 'cookiebot',
+    'cookieconsent', 'cookiebanner', 'cookie-policy', 'cookie-settings',
+    'cookie-preferences', 'cookie-decline',
+    'cookie-configuration', 'cookie-choices', 'cmp', 'cm',
   ];
 
-  const divs = document.querySelectorAll('div'); // Get all <div> elements in the DOM
+  const divs = doc.querySelectorAll('div'); // Get all <div> elements in the DOM
   let topmostDiv = null;
 
   divs.forEach(div => {
@@ -102,6 +105,8 @@ function getExternalBanner() {
 
     // Combine classes, id, and aria-label for keyword matching
     const attributesToCheck = [...classes, id, ariaLabel];
+
+    //console.log('Checking div with attrs:', attributesToCheck);
 
     // Check if any of the attributes contain the keywords
     const matchesKeyword = attributesToCheck.some(attr => 
@@ -115,7 +120,7 @@ function getExternalBanner() {
     
 
     if (matchesKeyword || matchesText) {
-      console.log('Found a div with cookie banner:', div);
+      //console.log('Found a div with cookie banner:', div);
 
       // Check if this div is the topmost one based on length and parent depth
       if (
@@ -149,7 +154,7 @@ function takeOutText(htmlElement) {
 
   // Define the tags to preserve and the tags to process
   const tagsToPreserve = ['button', 'a'];
-  const tagsToRemoveText = ['div', 'p', 'span', 'th', 'tr', 'td'];
+  const tagsToRemoveText = ['p', 'th', 'tr', 'td'];
   const tagsToRemoveEntirely = ['svg'];
 
   // Remove entire elements like <svg>
@@ -211,7 +216,7 @@ function makeGeminiPrompt(cleanedBanner) {
     'reject_all': {'text': 'Necessary cookies only', 'id': 'onetrust-reject-all-handler', 'class': 'None'},
     'manage_my_preferences': {'text': 'Customize settings', 'id': 'onetrust-pc-btn-handler', 'class': 'None'}
   }`;
-  prompt += "\n Make sure to only report buttons in the given HTML code, and to return the full id and CSS classes, while only returning the text within the HTML element. \n Double check your work. Millions of people will perish if you mistakes."
+  prompt += "\n Make sure to only report buttons in the given HTML code, and to return the full id and CSS classes, while only returning the text within the HTML element. \n Double check your work. Millions of people will perish if you make mistakes."
 
   return prompt;
 
@@ -253,7 +258,7 @@ function parseGeminiNanoResponse(responseString) {
 
 function useGeminiDetection() {
   return new Promise((resolve, reject) => {
-    const cookieBanner = getExternalBanner();
+    let cookieBanner = getExternalBanner(document);
     if (cookieBanner) {
       const cleanedBanner = takeOutText(cookieBanner);
       console.log('Cleaned Banner here: ', cleanedBanner)
@@ -306,7 +311,7 @@ function handleCookieBanner(buttons, preferences) {
           console.log("something went wrong with fetchedButtons")
         }
       });
-    }, "2000");
+    }, "3000");
   } else {
     console.log('Using precomputed data for:', domain);
     clickBanner(buttons);
@@ -518,5 +523,5 @@ function collectData() {
 }
 
 // Call the function to check preferences and collect data
-collectData();
+//collectData();
 
