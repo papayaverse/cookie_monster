@@ -73,7 +73,7 @@ function getGeminiNanoSession() {
       console.log("Gemini Nano session created:", newSession);
       return newSession;
     }).catch((error) => {
-      console.error("Failed to create Gemini Nano session:", error);
+      console.error("Failed to create Gemini Nano session:", error.message);
       sessionPromise = null; // Reset so it can retry later
       throw error;
     });
