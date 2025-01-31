@@ -314,7 +314,9 @@ function handleCookieBanner(buttons, preferences) {
     }, "3000");
   } else {
     console.log('Using precomputed data for:', domain);
-    clickBanner(buttons);
+    setTimeout(() => {
+      clickBanner(buttons);
+    }, "1000");
   }
 
   // Helper function to find and click a button
